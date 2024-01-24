@@ -1,7 +1,7 @@
 #include "impl/managed_shmem.hpp"
 
-#include <boost/interprocess/containers/map.hpp>
 #include "boost/date_time/posix_time/posix_time_types.hpp"
+#include <boost/interprocess/containers/map.hpp>
 #include <phosphor-logging/lg2.hpp>
 
 #include <chrono>
@@ -15,16 +15,18 @@ ManagedShmem::ManagedShmem(const string &nameSpace, const int opts,
     : opts(opts), nameSpace(nameSpace) {
   if (!boost::interprocess::shared_memory_object::remove(
           string(nameSpace).c_str())) {
-    lg2::info("Shared memory namespace {SHM_NAMESPACE} does not exist. "
-              "Remove is skipped.",
-              "SHM_NAMESPACE", nameSpace);
+    lg2::info(
+        "SHMEMDEBUG: Shared memory namespace {SHM_NAMESPACE} does not exist. "
+        "Remove is skipped.",
+        "SHM_NAMESPACE", nameSpace);
   }
   memory = make_unique<boost::interprocess::managed_shared_memory>(
       boost::interprocess::open_or_create, nameSpace.c_str(), maxSize);
 
   if (!boost::interprocess::named_upgradable_mutex::remove(
           string(nameSpace + "lock").c_str())) {
-    lg2::info("Shared memory namespace lock {SHM_NAMESPACE_LOCK} does not "
+    lg2::info("SHMEMDEBUG: Shared memory namespace lock {SHM_NAMESPACE_LOCK} "
+              "does not "
               "exist. Remove lock is skipped.",
               "SHM_NAMESPACE_LOCK", nameSpace + "lock");
   }

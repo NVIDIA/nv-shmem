@@ -10,6 +10,7 @@
 
 #pragma once
 
+#include "impl/config_json_reader.hpp"
 #include "shm_sensormap_intf.hpp"
 #include <shm_common.h>
 #include <utils/metric_report_utils.hpp>
@@ -19,21 +20,16 @@
 
 #include <mutex>
 #include <unordered_map>
+#include <utility>
 
 namespace nv {
 namespace sensor_aggregation {
 using namespace std;
 using namespace nv::sensor_aggregation::metricUtils;
 using DevicePath = string;
-using SensorNameSpace = string;
 using DeviceName = string;
 using SubDeviceName = string;
 using SensorPath = string;
-using ObjectpathKeywords = string;
-using PropertyList = vector<string>;
-using NameSpaceValue = pair<ObjectpathKeywords, PropertyList>;
-using NameSpaceValues = vector<NameSpaceValue>;
-using NameSpaceConfiguration = unordered_map<SensorNameSpace, NameSpaceValues>;
 struct NameSpaceFields {
   SensorNameSpace sensorNameSpace;
   DeviceName deviceName;
@@ -63,8 +59,9 @@ public:
    * @brief SHMSensorAggregator object
    *
    */
-  explicit SHMSensorAggregator(string producerName)
-      : producerName(move(producerName)) {}
+  explicit SHMSensorAggregator(string producerName,
+                               NameSpaceConfiguration nameSpaceCfg)
+      : producerName(move(producerName)), nameSpaceConfig(move(nameSpaceCfg)) {}
 
   /**
    * @brief This method inserts shared memory object if entry is not present in
@@ -108,88 +105,7 @@ private:
   string producerName;
   mutex nameSpaceMapLock;
   mutex notApplicableKeysLock;
-  NameSpaceConfiguration nameSpaceConfig = {
-      {"ProcessorMetrics",
-       {{"processors",
-         {"ceCount",
-          "ueCount",
-          "OperatingSpeed",
-          "Utilization",
-          "State",
-          "L0ToRecoveryCount",
-          "LanesInUse",
-          "MaxLanes",
-          "NAKReceivedCount",
-          "NAKSentCount",
-          "PCIeType",
-          "ReplayCount",
-          "ReplayRolloverCount",
-          "feCount",
-          "nonfeCount",
-          "AccumulatedGPUContextUtilizationDuration",
-          "AccumulatedSMUtilizationDuration",
-          "GlobalSoftwareViolationThrottleDuration",
-          "HardwareViolationThrottleDuration",
-          "PCIeRXBytes",
-          "PCIeTXBytes",
-          "PowerLimitThrottleDuration",
-          "ThermalLimitThrottleDuration",
-          "ThrottleReason"}}}},
-      {"ProcessorPortMetrics",
-       {{"processors/Ports",
-         {"CurrentSpeed", "DataCRCCount", "FlitCRCCount", "RXBytes",
-          "RXNoProtocolBytes", "RecoveryCount", "ReplayErrorsCount",
-          "RuntimeError", "TXBytes", "TXNoProtocolBytes", "TrainingError",
-          "MaxSpeed", "TXWidth", "RXWidth", "LinkStatus"}}}},
-      {"ProcessorGPMMetrics",
-       {{"processors",
-         {"DMMAUtilizationPercent",
-          "FP16ActivityPercent",
-          "FP32ActivityPercent",
-          "FP64ActivityPercent",
-          "GraphicsEngineActivityPercent",
-          "HMMAUtilizationPercent",
-          "IMMAUtilizationPercent",
-          "IntergerActivityUtilizationPercent",
-          "NVDecInstanceUtilizationPercent",
-          "NVDecUtilizationPercent",
-          "NVJpgInstanceUtilizationPercent",
-          "NVJpgUtilizationPercent",
-          "NVOfaUtilizationPercent",
-          "PCIeRawRxBandwidthGbps",
-          "PCIeRawTxBandwidthGbps",
-          "SMActivityPercent",
-          "SMOccupancyPercent",
-          "TensorCoreActivityPercent",
-          "NVLinkRawTxBandwidthGbps",
-          "NVLinkRawRxBandwidthGbps",
-          "NVLinkDataTxBandwidthGbps",
-          "NVLinkDataRxBandwidthGbps"}}}},
-      {"ProcessorPortGPMMetrics",
-       {{"processors/Ports",
-         {"NVLinkDataRxBandwidthGbps", "NVLinkDataTxBandwidthGbps",
-          "NVLinkRawRxBandwidthGbps", "NVLinkRawTxBandwidthGbps"}}}},
-      {"MemoryMetrics",
-       {{"memory",
-         {"MemoryConfiguredSpeedInMhz", "Utilization", "ceCount", "ueCount",
-          "RowRemappingFailureState", "ceRowRemappingCount",
-          "ueRowRemappingCount"}}}},
-      {"PlatformEnvironmentMetrics",
-       {{"sensors/temperature", {"Value"}},
-        {"sensors/power", {"Value"}},
-        {"sensors/energy", {"Value"}}}},
-      {"NVSwitchMetrics",
-       {{"Switches",
-         {"ceCount", "ueCount", "L0ToRecoveryCount", "NAKReceivedCount",
-          "NAKSentCount", "ReplayCount", "ReplayRolloverCount", "ceCount",
-          "feCount", "nonfeCount"}}}},
-      {"NVSwitchPortMetrics",
-       {{"Switches/Ports",
-         {"CurrentSpeed", "DataCRCCount", "FlitCRCCount", "LinkStatus",
-          "MaxSpeed", "RXBytes", "RXNoProtocolBytes", "RXWidth",
-          "RecoveryCount", "ReplayErrorsCount", "RuntimeError", "TXBytes",
-          "TXNoProtocolBytes", "TXWidth", "TrainingError"}}}},
-  };
+  NameSpaceConfiguration nameSpaceConfig;
   shmem::ShmSensorMapIntf sensorMapIntf;
   NameSpaceMap nameSpaceMap;
   unordered_map<string, uint8_t> notApplicableKeys;

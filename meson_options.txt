@@ -8,3 +8,4 @@ option('libsmbus-test', type: 'feature', description: 'Build smbus-telemetry-tar
 option('smbus-sysfs-path', type : 'string', value : '/dev/null', description : 'SMBus Slave Device sysfs path')
 option('smbus-telemetry-config-csv', type : 'string', value : '/usr/share/smbus-telemetry-target/smbus-telemetry-config.csv', description : 'SMBus slave config csv')
 option('smbus-data-record', type : 'integer', value : 7, description : 'SMBus Data Record size')
+option('enable-shm-debug', type: 'feature', value: 'disabled', description: 'Enable this flag for additional debug traces. This flag should be used only for debug purpose and it will impact performance.')

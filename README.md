@@ -99,26 +99,82 @@ Producers will use the sensor aggregator library APIs to
 ### Configuration json for metric property mapping
 
 There would be a configuration file which maps MRD namespace to all the shared
-memory namespaces exposed by each of the sensor provider services. An example of
-this namespace mapping is given below.
+memory namespaces exposed by each of the sensor provider services.
+`SensorNamespaces` key contains rules for each of the sensor namespace which is
+combination of `Namespace`, `ObjectpathKeywords` and `PropertyList`.
+
+Note: By default `shm_namespace_config.json` file present in configurations
+directory will be used. Override this file in your platform recipe file based on
+the requirement.
+
+An example of this configuration file is given below.
 
 ```ascii
 {
-   "SensorNamespaces":[
-      {
-         "MrdNameSpace":"PlatformEnvironmentMetrics",
-         "ShmemNameSpaces":[
-            "gpumngr_PlatformEnvironmentMetrics",
-            "pldmd_PlatformEnvironmentMetrics"
-         ]
-      },
-      {
-         "MrdNameSpace":"NVSwitchPortMetrics",
-         "ShmemNameSpaces":[
-            "gpumngr_NVSwitchPortMetrics"
-         ]
-      }
-   ]
+  "SensorNamespaces": [
+    {
+        "Namespace": "PlatformEnvironmentMetrics",
+        "ObjectpathKeywords": "sensors/temperature",
+        "PropertyList": ["Value"]
+    },
+    {
+        "Namespace": "MemoryMetrics",
+        "ObjectpathKeywords": "memory",
+        "PropertyList": [
+            "MemoryConfiguredSpeedInMhz",
+            "Utilization",
+            "ceCount",
+            "ueCount",
+            "RowRemappingFailureState",
+            "ceRowRemappingCount",
+            "ueRowRemappingCount"
+        ]
+    }
+  ]
+}
+
+```
+
+### Shared memory mapping json
+
+This file will have updating producer names for all the sensor namespaces. For
+each namespace
+
+- `Producers` key will contain list of processes which updates shared memory for
+  the given namespace.
+- Shared memory size should be specified in bytes with field `SizeInBytes`
+
+Note: By default `shm_mapping.json` file present in configurations directory
+will be used. Override this file in your platform recipe file based on the
+requirement.
+
+SizeInBytes is currently defined as below. The calculation is based on used size
+in HGX platform for each of the metrics namespaces.
+
+Used size is calculated using `managed_shared_memory.get_free_memory()` api.
+Based on the used size it's adjusted to it's near 2's power value in bytes.
+
+| Namespace                        | Size in system KB | Allocated size |
+| -------------------------------- | ----------------- | -------------- |
+| HGX_MemoryMetrics_0              | 46.1328125        | 128 KB         |
+| HGX_NVSwitchMetrics_0            | 40.4453125        | 128 KB         |
+| HGX_NVSwitchPortMetrics_0        | 894.4765625       | 1024 KB        |
+| HGX_PlatformEnvironmentMetrics_0 | 55.921875         | 128 KB         |
+| HGX_ProcessorGPMMetrics_0        | 138.0234375       | 256 KB         |
+| HGX_ProcessorMetrics_0           | 103.2734375       | 256 KB         |
+| HGX_ProcessorPortGPMMetrics_0    | 267.203125        | 512 KB         |
+| HGX_ProcessorPortMetrics_0       | 829.7265625       | 1024 KB        |
+
+An example of this namespace mapping is given below.
+
+```
+{
+    "Namespaces": {
+        "PlatformEnvironmentMetrics": {
+            "Producers": ["gpumgrd", "pldmd"],
+            "SizeInBytes": 1024000
+        }
+    }
 }
 ```
 
@@ -263,3 +319,9 @@ querying the MRD properties.
 Internal clients needs to explicitly check telemetry readiness from the CSM
 module over dbus and when its ready they can fetch the MRD objects from the
 shmem.
+
+## Troubleshooting and logging
+
+By default only informational and error logs are enabled. Debug logs can be
+enabled with a meson flag `enable-shm-debug`. To add additional debug traces you
+can use `SHMDEBUG` method.

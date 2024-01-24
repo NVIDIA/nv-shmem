@@ -4,6 +4,12 @@
 #include <sdbusplus/bus.hpp>
 #include <vector>
 
+#ifdef ENABLE_SHM_DEBUG 
+#define SHMDEBUG(msg, ...) lg2::info(msg, __VA_ARGS__)
+#else
+#define SHMDEBUG(msg, ...)
+#endif
+
 namespace nv {
 namespace sensor_aggregation {
 // using namespace std;
