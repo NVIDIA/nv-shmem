@@ -1,92 +1,265 @@
-# nv-shmem
+# Library for Shared Memory based Sensor Aggregation
 
+Author: Chinmay Shripad Hegde <chinmays@nvidia.com> Rohit Pai <ropai@nvidia.com>
 
+Created: 2023-12-27
 
-## Getting started
+## Problem Description
 
-To make it easy for you to get started with GitLab, here's a list of recommended next steps.
+In the existing architecture bmcweb makes Object manager based D-Bus calls and
+processes all the properties in the response to filter out and prepare the
+properties required for MRD URIs. With this approach we have performance impacts
+such as % PID loop outliers and maximum MRD TAT crossing the SLAs.
 
-Already a pro? Just edit this README.md and make it your own. Want to make it easy? [Use the template at the bottom](#editing-this-readme)!
+## Background and References
 
-## Add your files
+Shared memory sensor repository acts like a cache for bmweb where all the sensor
+data and metric values required to prepare the response for MRD requests are
+readily available. The repository is periodically updated by the sensor
+aggregator library which gets the data from individual sensor producers. Sensor
+producers will use shared memory APIs to insert and update the MRD values.This
+brings in significant reduction in processing time of MRD requests in bmcweb
+which will help to improve the SLAs.
 
-- [ ] [Create](https://docs.gitlab.com/ee/user/project/repository/web_editor.html#create-a-file) or [upload](https://docs.gitlab.com/ee/user/project/repository/web_editor.html#upload-a-file) files
-- [ ] [Add files using the command line](https://docs.gitlab.com/ee/gitlab-basics/add-file.html#add-a-file-using-the-command-line) or push an existing Git repository with the following command:
+### References
 
+| Content                                             | Link                                                                                                               |
+| --------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------ |
+| Redfish Telemetry Performance                       | https://docs.google.com/presentation/d/1Srm3HF2QK7uQGdDESiIBHUAMPdG0nOXfHvY94QH18uo/edit#slide=id.g25866484049_0_0 |
+| TAL Fasibility Study and Recommendation for Umbriel | https://docs.google.com/document/d/1UanEEKkR5ffHC1_QCb55f9HONJ3zH9e8ocVhRK0gc6Q/edit#heading=h.vvyjokuu77rq        |
+| Requirements                                        | https://docs.google.com/document/d/1W--n4Mu_twg8rsMzq8JtJmyqOaWnEVHluvHbr0BVvEE/edit                               |
+| Telemetry SLAs                                      | https://docs.google.com/document/d/1nP8F1Xc6kB_qU5xSr0NDQ5lQL1bTkEux0O3Rrmg8PUw/edit#heading=h.1jwg24jxwkrr        |
+
+## Requirements
+
+### External API requirements
+
+- API for data producer to update telemetry objects in shared memory.
+- API for client such as bmcweb to read telemetry objects for a given metric
+  namespace.
+
+### Shared Memory internal requirements:
+
+- Shmem library must support creation of shared memory segments which can be
+  used as fast IPC between multiple processes.
+- The Shmem library must abstract the internal memory layout required to save
+  the objects.
+- Shmem library must support unified object access APIs.
+- Shemem library must support efficient access to single object.
+- Shemem library APIs must ensure data integrity and protection in a multi
+  process environment.
+- Shemem library must provide CLI tool which can be invoked from shell to read,
+  updated and erase objects in the shared memory segments.
+
+## Proposed Design
+
+```ascii
+                    ┌─────────────────────────────────┐
+                    │                                 │
+┌────────┐          │  ┌──────────────────────────┐   │
+│        │          │  │                          │   │
+│ Client ├──────────┼──►    getAllMRDValues       │   │
+│        │          │  │                          │   │
+└────────┘          │  └────────────▲─────────────┘   │
+                    │               │                 │             ┌─────────────────┐
+                    │               └──────Read───────┼─────────────►                 │
+                    │               ┌──────Write──────┼─────────────►   Shared Memory │
+                    │               │                 │             └─────────────────┘
+                    │  ┌────────────┴─────────────┐   │
+┌────────────┐      │  │    - namespaceInit       │   │
+│            │      │  │    - updateTelemetry     │   │
+│Producer - 1├───┬──┼──►                          │   │
+│            │   │  │  └──────────────────────────┘   │
+└────────────┘   │  │                                 │
+                 │  │  Shared Memory Library          │
+┌────────────┐   │  │                                 │
+│            │   │  └─────────────────────────────────┘
+│Producer - 2├───┘
+│            │
+└────────────┘
 ```
-cd existing_repo
-git remote add origin https://gitlab-master.nvidia.com/dgx/bmc/nv-shmem.git
-git branch -M main
-git push -uf origin main
+
+### Sensor Producer Workflow
+
+Producers will use the sensor aggregator library APIs to
+
+- Initialize the producer name
+- Create Sensor Objects in the shared memory
+- Update Value and/OR Timestamp values
+
+### Bmcweb Workflow
+
+- Sensor Aggregator library provides an API to get all objects from a MRD
+  namespace.
+- Based on the MRD requested in the URI, the library creates a list of shared
+  memory namespaces whose metric type matches with the requested metric type in
+  the URI. From each of the shared memory regions read all objects and aggregate
+  them.
+
+### Configuration json for metric property mapping
+
+There would be a configuration file which maps MRD namespace to all the shared
+memory namespaces exposed by each of the sensor provider services. An example of
+this namespace mapping is given below.
+
+```ascii
+{
+   "SensorNamespaces":[
+      {
+         "MrdNameSpace":"PlatformEnvironmentMetrics",
+         "ShmemNameSpaces":[
+            "gpumngr_PlatformEnvironmentMetrics",
+            "pldmd_PlatformEnvironmentMetrics"
+         ]
+      },
+      {
+         "MrdNameSpace":"NVSwitchPortMetrics",
+         "ShmemNameSpaces":[
+            "gpumngr_NVSwitchPortMetrics"
+         ]
+      }
+   ]
+}
 ```
-
-## Integrate with your tools
-
-- [ ] [Set up project integrations](https://gitlab-master.nvidia.com/dgx/bmc/nv-shmem/-/settings/integrations)
-
-## Collaborate with your team
-
-- [ ] [Invite team members and collaborators](https://docs.gitlab.com/ee/user/project/members/)
-- [ ] [Create a new merge request](https://docs.gitlab.com/ee/user/project/merge_requests/creating_merge_requests.html)
-- [ ] [Automatically close issues from merge requests](https://docs.gitlab.com/ee/user/project/issues/managing_issues.html#closing-issues-automatically)
-- [ ] [Enable merge request approvals](https://docs.gitlab.com/ee/user/project/merge_requests/approvals/)
-- [ ] [Set auto-merge](https://docs.gitlab.com/ee/user/project/merge_requests/merge_when_pipeline_succeeds.html)
-
-## Test and Deploy
-
-Use the built-in continuous integration in GitLab.
-
-- [ ] [Get started with GitLab CI/CD](https://docs.gitlab.com/ee/ci/quick_start/index.html)
-- [ ] [Analyze your code for known vulnerabilities with Static Application Security Testing(SAST)](https://docs.gitlab.com/ee/user/application_security/sast/)
-- [ ] [Deploy to Kubernetes, Amazon EC2, or Amazon ECS using Auto Deploy](https://docs.gitlab.com/ee/topics/autodevops/requirements.html)
-- [ ] [Use pull-based deployments for improved Kubernetes management](https://docs.gitlab.com/ee/user/clusters/agent/)
-- [ ] [Set up protected environments](https://docs.gitlab.com/ee/ci/environments/protected_environments.html)
-
-***
-
-# Editing this README
-
-When you're ready to make this README your own, just edit this file and use the handy template below (or feel free to structure it however you want - this is just a starting point!). Thank you to [makeareadme.com](https://www.makeareadme.com/) for this template.
-
-## Suggestions for a good README
-Every project is different, so consider which of these sections apply to yours. The sections used in the template are suggestions for most open source projects. Also keep in mind that while a README can be too long and detailed, too long is better than too short. If you think your README is too long, consider utilizing another form of documentation rather than cutting out information.
-
-## Name
-Choose a self-explaining name for your project.
-
-## Description
-Let people know what your project can do specifically. Provide context and add a link to any reference visitors might be unfamiliar with. A list of Features or a Background subsection can also be added here. If there are alternatives to your project, this is a good place to list differentiating factors.
-
-## Badges
-On some READMEs, you may see small images that convey metadata, such as whether or not all the tests are passing for the project. You can use Shields to add some to your README. Many services also have instructions for adding a badge.
-
-## Visuals
-Depending on what you are making, it can be a good idea to include screenshots or even a video (you'll frequently see GIFs rather than actual videos). Tools like ttygif can help, but check out Asciinema for a more sophisticated method.
-
-## Installation
-Within a particular ecosystem, there may be a common way of installing things, such as using Yarn, NuGet, or Homebrew. However, consider the possibility that whoever is reading your README is a novice and would like more guidance. Listing specific steps helps remove ambiguity and gets people to using your project as quickly as possible. If it only runs in a specific context like a particular programming language version or operating system or has dependencies that have to be installed manually, also add a Requirements subsection.
 
 ## Usage
-Use examples liberally, and show the expected output if you can. It's helpful to have inline the smallest example of usage that you can demonstrate, while providing links to more sophisticated examples if they are too long to reasonably include in the README.
 
-## Support
-Tell people where they can go to for help. It can be any combination of an issue tracker, a chat room, an email address, etc.
+### Shared memory client APIs
 
-## Roadmap
-If you have ideas for releases in the future, it is a good idea to list them in the README.
+This API returns all metric report definitions for a given namespace. This API
+should be used by MRD clients such as bmcweb. Exceptions will be thrown in case
+of no elements or absense of given shared memory namespace.
 
-## Contributing
-State if you are open to contributions and what your requirements are for accepting them.
+```ascii
+API:
+std::vector<SensorValue> getAllMRDValues(const string &mrdNamespace);
 
-For people who want to make changes to your project, it's helpful to have some documentation on how to get started. Perhaps there is a script that they should run or some environment variables that they need to set. Make these steps explicit. These instructions could also be useful to your future self.
+Example:
+std::string metricId = "PlatformEnvironmentMetrics";
+const auto& values = nv::shmem::sensor_aggregation::getAllMRDValues(metricId);
+```
 
-You can also document commands to lint the code or run tests. These steps help to ensure high code quality and reduce the likelihood that the changes inadvertently break something. Having instructions for running tests is especially helpful if it requires external setup, such as starting a Selenium server for testing in a browser.
+### Shared memory producer APIs
 
-## Authors and acknowledgment
-Show your appreciation to those who have contributed to the project.
+#### Init namespace
 
-## License
-For open source projects, say how it is licensed.
+This API is to initialize the namespace. This API takes the process name as
+input which will be the suffix for shared memory namespaces. This API should be
+called once in telemetry producers, before creating new telemetry objects.
 
-## Project status
-If you have run out of energy or time for your project, put a note at the top of the README saying that development has slowed down or stopped completely. Someone may choose to fork your project or volunteer to step in as a maintainer or owner, allowing your project to keep going. You can also make an explicit request for maintainers.
+API:
+
+```ascii
+
+static bool AggregationService::namespaceInit(const std::string& processName);
+```
+
+Parameters:
+
+- processName - process name of producer service
+
+Example:
+
+```ascii
+std::string producerName = "gpumgrd";
+AggregationService::namespaceInit(producerName);
+```
+
+#### Update telemetry
+
+API to add new telemetry object, update existing telemetry object value and
+update nan. This API should be called by telemetry producers.
+
+All PlatformEnvironmentMetrics will be under /xyz/openbmc_project/sensors. This
+API expects associationPath for sensors paths and returns error if
+associationPath is not passed for the sensor objects.
+
+API:
+
+```ascii
+static bool AggregationService::updateTelemetry(const std::string& devicePath,
+                 const std::string& interface,
+                 const std::string& propName,
+                 DbusVariantType& value, const uint64_t timestamp, int rc,
+                 const std::string associatedEntityPath = {});
+```
+
+Parameters:
+
+- devicePath - Device path of telemetry object.
+- interface - Phosphor D-Bus interface of telemetry object.
+- propName - Metric name.
+- value - Metric value.
+- timestamp - Timestamp of telemetry object.
+- rc - Set this value to non zero for nan update.
+- associatedEntityPath - optional for other metrics. Required for platform
+  environment metrics.
+
+Example: Insert
+
+```ascii
+#include <telemetry_mrd_service.hpp>
+using namespace nv::sensor_aggregation;
+
+std::string devicePath =
+    "/xyz/openbmc_project/sensors/temperature/HGX_Chassis_0_HSC_0_Temp_0";
+std::string interface = "xyz.openbmc_project.Sensor.Value";
+std::string propertyName = "Value";
+std::string parentPath = "HGX_Chassis_0";
+DbusVariantType value = 19.0625;
+uint64_t timeStamp = 23140448;
+
+if (AggregationService::updateTelemetry(devicePath, interface,
+                                        propertyName, value, 0, 0,
+                                        parentPath)) {
+  std::cout << "AggregationService::updateTelemetry success for new object"
+            << std::endl;
+} else {
+  std::cout << "AggregationService::updateTelemetry failed for new object"
+            << std::endl;
+}
+```
+
+Example: Update timestamp and value
+
+```ascii
+value = 29.0625;
+timeStamp = 23150448
+if (AggregationService::updateTelemetry(devicePath, interface,
+                                        propertyName, value, 0, 0,
+                                        parentPath)) {
+  std::cout << "AggregationService::updateTelemetry value and timestamp "
+                "update success"
+            << std::endl;
+} else {
+  std::cout << "AggregationService::updateTelemetry value and timestamp "
+                "update failed"
+            << std::endl;
+}
+
+```
+
+Example: Update nan
+
+```ascii
+if (AggregationService::updateTelemetry(
+        devicePath, interface, propertyName, value, timeStamp, -1)) {
+  std::cout << "AggregationService: nan handling simple type success"
+            << std::endl;
+} else {
+  std::cout << "AggregationService: nan handling simple type failed"
+            << std::endl;
+}
+
+```
+
+## Telemetry Readiness
+
+Individual producers update the status in CSM over D-Bus once all objects are
+updated, CSM populates the overall telemetry readiness based on individual
+producer state. Redfish clients should rely on Telemetry readiness before
+querying the MRD properties.
+
+Internal clients needs to explicitly check telemetry readiness from the CSM
+module over dbus and when its ready they can fetch the MRD objects from the
+shmem.
