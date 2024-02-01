@@ -451,25 +451,17 @@ inline string translateThrottleDuration(const string &metricName,
 /**
  * @brief Method to translate D-Bus AccumlatedDuration redfish AccumlatedDuratio
  *
- * @param metricName
  * @param reading
  * @return string
  */
-inline string translateAccumlatedDuration(const string &metricName,
-                                          const uint32_t &reading) {
-  string metricValue;
-  if ((metricName == "AccumulatedSMUtilizationDuration") ||
-      (metricName == "AccumulatedGPUContextUtilizationDuration")) {
-    auto nanoseconds = static_cast<uint64_t>(reading);
-    optional<string> duration =
-        nv::sensor_aggregation::metricUtils::toDurationStringFromNano(
-            nanoseconds);
-    if (duration) {
-      metricValue = *duration;
-    }
-  } else {
-    metricValue = to_string(reading);
+inline string translateAccumlatedDuration(const uint64_t &reading) {
+  std::string metricValue;
+  std::optional<std::string> duration =
+      nv::sensor_aggregation::metricUtils::toDurationStringFromUint(reading);
+  if (duration) {
+    metricValue = *duration;
   }
+
   return metricValue;
 }
 
@@ -557,16 +549,14 @@ getMetricValues(const string &deviceType, const string &deviceName,
 
       val = to_string(*reading);
     } else if (const uint32_t *reading = get_if<uint32_t>(&value)) {
-      if (ifaceName == "xyz.openbmc_project.State.ProcessorPerformance") {
-        val = translateAccumlatedDuration(metricName, *reading);
-      } else {
-        val = to_string(*reading);
-      }
+      val = to_string(*reading);
     } else if (const uint64_t *reading = get_if<uint64_t>(&value)) {
-      if (ifaceName == "xyz.openbmc_project.State.ProcessorPerformance") {
-        val = translateThrottleDuration(metricName, *reading);
+      if ((ifaceName == "xyz.openbmc_project.State.ProcessorPerformance") &&
+          ((metricName == "AccumulatedSMUtilizationDuration") ||
+           (metricName == "AccumulatedGPUContextUtilizationDuration"))) {
+        val = translateAccumlatedDuration(*reading);
       } else {
-        val = to_string(*reading);
+        val = translateThrottleDuration(metricName, *reading);
       }
     } else if (const double *reading = get_if<double>(&value)) {
 
@@ -614,16 +604,14 @@ inline SHMValue getMetricValue(const string &metricName,
 
     val = to_string(*reading);
   } else if (const uint32_t *reading = get_if<uint32_t>(&value)) {
-    if (ifaceName == "xyz.openbmc_project.State.ProcessorPerformance") {
-      val = translateAccumlatedDuration(metricName, *reading);
-    } else {
-      val = to_string(*reading);
-    }
+    val = to_string(*reading);
   } else if (const uint64_t *reading = get_if<uint64_t>(&value)) {
-    if (ifaceName == "xyz.openbmc_project.State.ProcessorPerformance") {
-      val = translateThrottleDuration(metricName, *reading);
+    if ((ifaceName == "xyz.openbmc_project.State.ProcessorPerformance") &&
+        ((metricName == "AccumulatedSMUtilizationDuration") ||
+         (metricName == "AccumulatedGPUContextUtilizationDuration"))) {
+      val = translateAccumlatedDuration(*reading);
     } else {
-      val = to_string(*reading);
+      val = translateThrottleDuration(metricName, *reading);
     }
   } else if (const double *reading = get_if<double>(&value)) {
 
