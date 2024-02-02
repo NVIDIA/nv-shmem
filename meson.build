@@ -13,8 +13,10 @@ project('nvshmem', 'cpp',
 
 add_project_arguments('-Wno-psabi', language: 'cpp')
 
-subdir('lib')
-subdir('tools')
+if not get_option('nvidia-shmem').disabled()
+  subdir('lib')
+  subdir('tools')
+endif
 
 if get_option('libonly')
   subdir_done()
