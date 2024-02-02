@@ -1,5 +1,6 @@
 option('libonly', type: 'boolean', description: 'Build library only')
 option('tests', type: 'feature', description: 'Build tests')
+option('nvidia-shmem', type: 'feature', description: 'Build nvidia-shmem')
 option('platform-system-id', type : 'string', value : 'system', description : 'Platform specific computer system id, which is required to fill redfish metric property.')
 option('platform-device-prefix', type : 'string', value : '', description : 'Platform specific device name prefix, which is required to add platform name in metric report name.')
 option('smbus-telemetry-target', type: 'feature', description: 'Build smbus-telemetry-target')
