@@ -145,19 +145,21 @@ public:
       auto itr = sensor_map.find(mrdNamespace);
       if (itr != sensor_map.end()) {
         if (!((*itr).second->updateValue(key, value))) {
-          lg2::error("Invalid shared memory key: {SHM_KEY}", "SHM_KEY", key);
+          lg2::error("SHMEMDEBUG: Invalid shared memory key: {SHM_KEY}",
+                     "SHM_KEY", key);
           return false;
         }
         return true;
       } else {
-        lg2::error(
-            "ShmSensorMapIntf updateValue unknown name space: {SHM_NAMESPACE}",
-            "SHM_NAMESPACE", mrdNamespace);
+        lg2::error("SHMEMDEBUG: ShmSensorMapIntf updateValue unknown name "
+                   "space: {SHM_NAMESPACE}",
+                   "SHM_NAMESPACE", mrdNamespace);
         return false;
       }
     } catch (exception const &e) {
-      lg2::error("ShmSensorMapIntf updateValue Exception: {SHM_NAMESPACE}",
-                 "SHM_NAMESPACE", e.what());
+      lg2::error(
+          "SHMEMDEBUG: ShmSensorMapIntf updateValue Exception: {SHM_NAMESPACE}",
+          "SHM_NAMESPACE", e.what());
       return false;
     }
   }
@@ -181,20 +183,22 @@ public:
       if (itr != sensor_map.end()) {
         if (!((*itr).second->updateValueAndTimeStamp(key, value, timestamp,
                                                      timeStampStr))) {
-          lg2::error("Invalid shared memory key: {SHM_KEY}", "SHM_KEY", key);
+          lg2::error("SHMEMDEBUG: Invalid shared memory key: {SHM_KEY}",
+                     "SHM_KEY", key);
           return false;
         }
         return true;
       } else {
-        lg2::error("ShmSensorMapIntf updateValueAndTimeStamp unknown name "
-                   "space: {SHM_NAMESPACE}",
-                   "SHM_NAMESPACE", mrdNamespace);
+        lg2::error(
+            "SHMEMDEBUG: ShmSensorMapIntf updateValueAndTimeStamp unknown name "
+            "space: {SHM_NAMESPACE}",
+            "SHM_NAMESPACE", mrdNamespace);
         return false;
       }
     } catch (exception const &e) {
-      lg2::error(
-          "ShmSensorMapIntf updateValueAndTimeStamp Exception: {SHM_NAMESPACE}",
-          "SHM_NAMESPACE", e.what());
+      lg2::error("SHMEMDEBUG: ShmSensorMapIntf updateValueAndTimeStamp "
+                 "Exception: {SHM_NAMESPACE}",
+                 "SHM_NAMESPACE", e.what());
       return false;
     }
   }
@@ -214,13 +218,15 @@ public:
         (*itr).second->erase(key);
         return true;
       } else {
-        lg2::error("ShmSensorMapIntf erase unknown name space: {SHM_NAMESPACE}",
+        lg2::error("SHMEMDEBUG: ShmSensorMapIntf erase unknown name space: "
+                   "{SHM_NAMESPACE}",
                    "SHM_NAMESPACE", mrdNamespace);
         return false;
       }
     } catch (exception const &e) {
-      lg2::error("ShmSensorMapIntf erase Exception: {SHM_NAMESPACE}",
-                 "SHM_NAMESPACE", e.what());
+      lg2::error(
+          "SHMEMDEBUG: ShmSensorMapIntf erase Exception: {SHM_NAMESPACE}",
+          "SHM_NAMESPACE", e.what());
       return false;
     }
   }

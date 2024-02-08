@@ -12,6 +12,7 @@ project('nvshmem', 'cpp',
 )
 
 add_project_arguments('-Wno-psabi', language: 'cpp')
+package_datadir = join_paths(get_option('prefix'), get_option('datadir'), meson.project_name())
 
 if not get_option('nvidia-shmem').disabled()
   subdir('lib')
@@ -32,3 +33,5 @@ if not get_option('smbus-telemetry-target').disabled()
     subdir('smbus-telemetry-target/test')
   endif
 endif
+install_data('configurations/shm_mapping.json', install_dir: package_datadir)
+install_data('configurations/shm_namespace_config.json', install_dir: package_datadir)

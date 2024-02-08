@@ -118,14 +118,14 @@ inline optional<chrono::milliseconds> fromDurationString(const string &str) {
     return out;
   }
   if (v.front() != 'P') {
-    lg2::error("Invalid duration format: {INVALID_DURATION}",
+    lg2::error("SHMEMDEBUG: Invalid duration format: {INVALID_DURATION}",
                "INVALID_DURATION", str);
     return nullopt;
   }
 
   v.remove_prefix(1);
   if (!details::fromDurationItem<details::Days>(v, 'D', out)) {
-    lg2::error("Invalid duration format: {INVALID_DURATION}",
+    lg2::error("SHMEMDEBUG: Invalid duration format: {INVALID_DURATION}",
                "INVALID_DURATION", str);
     return nullopt;
   }
@@ -134,7 +134,7 @@ inline optional<chrono::milliseconds> fromDurationString(const string &str) {
     return out;
   }
   if (v.front() != 'T') {
-    lg2::error("Invalid duration format: {INVALID_DURATION}",
+    lg2::error("SHMEMDEBUG: Invalid duration format: {INVALID_DURATION}",
                "INVALID_DURATION", str);
     return nullopt;
   }
@@ -142,7 +142,7 @@ inline optional<chrono::milliseconds> fromDurationString(const string &str) {
   v.remove_prefix(1);
   if (!details::fromDurationItem<chrono::hours>(v, 'H', out) ||
       !details::fromDurationItem<chrono::minutes>(v, 'M', out)) {
-    lg2::error("Invalid duration format: {INVALID_DURATION}",
+    lg2::error("SHMEMDEBUG: Invalid duration format: {INVALID_DURATION}",
                "INVALID_DURATION", str);
     return nullopt;
   }
@@ -150,18 +150,18 @@ inline optional<chrono::milliseconds> fromDurationString(const string &str) {
   if (v.find('.') != string::npos && v.find('S') != string::npos) {
     if (!details::fromDurationItem<chrono::seconds>(v, '.', out) ||
         !details::fromDurationItem<chrono::milliseconds>(v, 'S', out)) {
-      lg2::error("Invalid duration format: {INVALID_DURATION}",
+      lg2::error("SHMEMDEBUG: Invalid duration format: {INVALID_DURATION}",
                  "INVALID_DURATION", str);
       return nullopt;
     }
   } else if (!details::fromDurationItem<chrono::seconds>(v, 'S', out)) {
-    lg2::error("Invalid duration format: {INVALID_DURATION}",
+    lg2::error("SHMEMDEBUG: Invalid duration format: {INVALID_DURATION}",
                "INVALID_DURATION", str);
     return nullopt;
   }
 
   if (!v.empty()) {
-    lg2::error("Invalid duration format: {INVALID_DURATION}",
+    lg2::error("SHMEMDEBUG: Invalid duration format: {INVALID_DURATION}",
                "INVALID_DURATION", str);
     return nullopt;
   }

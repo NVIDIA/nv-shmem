@@ -1,4 +1,4 @@
-nv_shmem_includes = include_directories('include', 'utils', '.')
+nv_shmem_includes = include_directories('include', 'utils', 'impl', '.')
 
 subdir('include')
 
@@ -13,6 +13,11 @@ conf_data = configuration_data()
 conf_data.set('libonly', get_option('libonly'))
 conf_data.set_quoted('PLATFORMSYSTEMID', get_option('platform-system-id'))
 conf_data.set_quoted('PLATFORMDEVICEPREFIX', get_option('platform-device-prefix'))
+conf_data.set_quoted('SHM_NAMESPACE_CFG_JSON', join_paths(package_datadir, 'shm_namespace_config.json'))
+conf_data.set_quoted('SHM_MAPPING_JSON', join_paths(package_datadir, 'shm_mapping.json'))
+if get_option('enable-shm-debug').enabled()
+    add_project_arguments('-DENABLE_SHM_DEBUG', language : 'cpp')
+endif
 conf_h_dep = declare_dependency(
     include_directories: include_directories('.'),
     sources: configure_file(
@@ -25,6 +30,7 @@ libnvshmem = static_library(
     'nvshmem',
     'managed_shmem.cpp',
     'shmem_map.cpp',
+    'config_json_reader.cpp',
     'telemetry_mrd_producer.cpp',
     'shm_sensor_aggregator.cpp',
     'telemetry_mrd_client.cpp',
