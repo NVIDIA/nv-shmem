@@ -28,6 +28,8 @@ int main(int argc, char *argv[]) {
       nv::shmem::Map<nv::shmem::SensorMap, nv::shmem::SensorValue> mShmem(
           name_space, O_RDONLY);
       trace(name_space, "Shmem Created (read-only).");
+      auto freeSize = mShmem.getFreeSize();
+      trace(name_space, "Shmem FreeSize: ", freeSize, " Bytes");
       auto values = mShmem.getAllValues();
       for (auto e : values) {
         trace("Sensor ", e.metricProperty, " : ", e.timestampStr, " : ",

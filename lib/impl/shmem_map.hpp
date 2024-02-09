@@ -120,6 +120,15 @@ public:
   bool updateValueAndTimeStamp(const string &key, const string &val,
                                const uint64_t timestamp,
                                const string &timestampStr);
+  /**
+   * @brief Method to get free memory available in the namespace.
+   *
+   * @return size_t - free memory available in bytes
+   */
+  size_t getFreeSize() {
+    size_t freeSize = memory->get_free_memory();
+    return freeSize;
+  }
 
 private:
   /** @brief Get the key in shared mem allocator format
