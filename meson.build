@@ -17,6 +17,8 @@ package_datadir = join_paths(get_option('prefix'), get_option('datadir'), meson.
 if not get_option('nvidia-shmem').disabled()
   subdir('lib')
   subdir('tools')
+  install_data('configurations/shm_mapping.json', install_dir: package_datadir)
+  install_data('configurations/shm_namespace_config.json', install_dir: package_datadir)
 endif
 
 if get_option('libonly')
@@ -33,5 +35,3 @@ if not get_option('smbus-telemetry-target').disabled()
     subdir('smbus-telemetry-target/test')
   endif
 endif
-install_data('configurations/shm_mapping.json', install_dir: package_datadir)
-install_data('configurations/shm_namespace_config.json', install_dir: package_datadir)
