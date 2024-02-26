@@ -107,6 +107,19 @@ Note: By default `shm_namespace_config.json` file present in configurations
 directory will be used. Override this file in your platform recipe file based on
 the requirement.
 
+If you need to add new property to existing metric
+
+- Identify the namespace
+- Verify the object path and add if new object paths is necessary
+- Update Property in the identfied section
+
+If you need to add a new namespace
+
+- Update namespace and size in [shm_mapping.json](#shared-memory-mapping-json)
+  file
+- Add a new entry in `shm_namespace_config.json` file with namespace, object
+  path keyword and property details
+
 An example of this configuration file is given below.
 
 ```ascii
@@ -156,14 +169,14 @@ Based on the used size it's adjusted to it's near 2's power value in bytes.
 
 | Namespace                        | Size in system KB | Allocated size |
 | -------------------------------- | ----------------- | -------------- |
-| HGX_MemoryMetrics_0              | 46.1328125        | 128 KB         |
-| HGX_NVSwitchMetrics_0            | 40.4453125        | 128 KB         |
-| HGX_NVSwitchPortMetrics_0        | 894.4765625       | 1024 KB        |
-| HGX_PlatformEnvironmentMetrics_0 | 55.921875         | 128 KB         |
-| HGX_ProcessorGPMMetrics_0        | 138.0234375       | 256 KB         |
-| HGX_ProcessorMetrics_0           | 103.2734375       | 256 KB         |
-| HGX_ProcessorPortGPMMetrics_0    | 267.203125        | 512 KB         |
-| HGX_ProcessorPortMetrics_0       | 829.7265625       | 1024 KB        |
+| MemoryMetrics_0              | 46.1328125        | 128 KB         |
+| NVSwitchMetrics_0            | 40.4453125        | 128 KB         |
+| NVSwitchPortMetrics_0        | 894.4765625       | 1024 KB        |
+| PlatformEnvironmentMetrics_0 | 55.921875         | 128 KB         |
+| ProcessorGPMMetrics_0        | 138.0234375       | 256 KB         |
+| ProcessorMetrics_0           | 103.2734375       | 256 KB         |
+| ProcessorPortGPMMetrics_0    | 267.203125        | 512 KB         |
+| ProcessorPortMetrics_0       | 829.7265625       | 1024 KB        |
 
 An example of this namespace mapping is given below.
 
@@ -261,7 +274,7 @@ std::string devicePath =
     "/xyz/openbmc_project/sensors/temperature/HGX_Chassis_0_HSC_0_Temp_0";
 std::string interface = "xyz.openbmc_project.Sensor.Value";
 std::string propertyName = "Value";
-std::string parentPath = "HGX_Chassis_0";
+std::string parentPath = "/xyz/openbmc_project/inventory/system/chassis/HGX_Chassis_0";
 DbusVariantType value = 19.0625;
 uint64_t timeStamp = 23140448;
 
@@ -319,6 +332,63 @@ querying the MRD properties.
 Internal clients needs to explicitly check telemetry readiness from the CSM
 module over dbus and when its ready they can fetch the MRD objects from the
 shmem.
+
+## Platform Enablement
+
+### Configuration Json
+
+- shm_mapping.json: Modify this file based on the namespaces supported and
+  producers for this platform. By default namespaces and producer names for
+  vulcan platform will be used. Refer
+  [Shared memory mapping json](#shared-memory-mapping-json) section for more
+  details.
+
+- shm_namespace_config.json: Update only if there are additional platform
+  specific properties. If those properties are not applicable for all platforms
+  use bbappend file to add this file to specific platform. Refer
+  [Configuration json for metric property mapping](#configuration-json-for-metric-property-mapping)
+  section for more details.
+
+### Recipe Changes
+
+- In platform `obmc-phosphor-image.bbappend` file, add `nvidia-shmem` to
+  `OBMC_IMAGE_EXTRA_INSTALL:append` section
+- In BMCWeb bbappend file add `nvidia-shmem` dependency and enable
+  `shmem-platform-metrics`
+
+  ```
+  EXTRA_OEMESON:append = " -Dshmem-platform-metrics=enabled "
+
+  DEPENDS:append = " nvidia-shmem"
+  ```
+
+- In `nvidia-shmem` bbappend file add `platform-system-id` and
+  `platform-system-id` based on platform id.
+
+  Example:
+
+  ```
+  EXTRA_OEMESON:append = " -Dplatform-system-id=HGX_Baseboard_0"
+  EXTRA_OEMESON:append = " -Dplatform-device-prefix=HGX_"
+  ```
+
+- If `shm_mapping.json` and `shm_namespace_config.json` has changes add those
+  files to the image.
+
+  Example:
+
+  ```
+  # Add platform specific shared memory mapping file
+  FILESEXTRAPATHS:prepend := "${THISDIR}/files:"
+  SRC_URI:append = " file://shm_mapping.json"
+  do_install:append() {
+      install -m 0644 ${WORKDIR}/shm_mapping.json ${D}${datadir}/nvshmem
+  }
+  ```
+
+### Reference MR
+
+https://gitlab-master.nvidia.com/dgx/bmc/openbmc/-/merge_requests/8363
 
 ## Troubleshooting and logging
 
