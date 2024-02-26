@@ -206,7 +206,7 @@ int smbusSlaveUpdate(std::string dbusObjPath, std::string iface,
         {
             // read
             uint8_t existingStaleValue = 0;
-            eepromFile.seekp(sensorDataMap[key].getSensorOffset());
+            eepromFile.seekp(sensorDataMap[key].getStaleOffset());
             eepromFile.read(reinterpret_cast<char*>(&existingStaleValue),
                             sizeof(existingStaleValue));
 
