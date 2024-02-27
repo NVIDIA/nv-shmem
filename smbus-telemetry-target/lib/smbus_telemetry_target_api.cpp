@@ -52,7 +52,7 @@ int updateSmbusTelemetry(const std::string& devicePath,
         devicePath, interface, propName, value, timestamp, rc);
         if (retVal != 0)
         {
-            lg2::error("Failed to update smbus device {DEVICEPATH}", "DEVICEPATH",
+            lg2::info("Failed to update smbus device {DEVICEPATH}", "DEVICEPATH",
                     devicePath);
             return retVal;
         }
