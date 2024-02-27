@@ -1,7 +1,7 @@
 {
     "Namespaces": {
         "PlatformEnvironmentMetrics": {
-            "Producers": ["gpumgrd"],
+            "Producers": ["gpumgrd", "hwmontemp"],
             "SizeInBytes": 131072
         },
         "MemoryMetrics": {
