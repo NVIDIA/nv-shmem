@@ -44,7 +44,7 @@ TEST(SmbusTelemetryUpdateApi_2, smbusSlaveUpdate)
     // call smbusSlaveUpdate with wrong data
     int rc = smbus_telemetry_update::smbusSlaveUpdate(dbusObjPath, iface,propName,
                                                             val, ts, retVal);
-    EXPECT_EQ(rc, 0x0200);
+    EXPECT_EQ(rc, 0);
 }
 
 TEST(SmbusTelemetryTargetApi_1, smbusSlaveInit)

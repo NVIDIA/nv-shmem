@@ -148,15 +148,14 @@ int smbusSlaveUpdate(std::string dbusObjPath, std::string iface,
     
     if (sensorDataMap.find(key) == sensorDataMap.end())
     {
-        lg2::info("SMBus slave telemetry sensor detail not found: {KEY}",
-                   "KEY", key);
-        return ErrorCode::SMBusUpdateDataNotFound;
+	// SmbusUpdate sensor configuration not supported.
+        return 0;
     }
 
     std::fstream eepromFile(i2cSlaveSysfs);
     if (!eepromFile)
     {
-        lg2::info(
+        lg2::error(
             "SMBus slave telemetry eeprom file not found : {I2CSLAVESYSFS}",
             "I2CSLAVESYSFS", i2cSlaveSysfs);
         return ErrorCode::SMBusSysfsPathNotFound;
