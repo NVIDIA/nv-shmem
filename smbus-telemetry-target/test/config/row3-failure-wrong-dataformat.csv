@@ -1,6 +1,6 @@
 slave_version,0x03,,,,,
-taleness_threshold,300,,,,,
-offset,length,data_format,dbus_objectpath,dbus_interface,dbus_property,stale_offset,stale_bit
+staleness_threshold,300,,,,,
+offset,length,dataformat,dbus_objectpath,dbus_interface,dbus_property,stale_offset,stale_bit
 0x19,4,SMBPBI_TEMP,/xyz/openbmc_project/sensors/temperature/HGX_GPU_SXM_1_DRAM_0_Temp_0,xyz.openbmc_project.Sensor.Value,Value,0x39,0
 0x1D,4,SMBPBI_TEMP,/xyz/openbmc_project/sensors/temperature/HGX_GPU_SXM_2_DRAM_0_Temp_0,xyz.openbmc_project.Sensor.Value,Value,0x39,1
 0xE6,4,SMBPBI_POWER,/xyz/openbmc_project/sensors/power/HGX_GPU_SXM_7_DRAM_0_Power_0,xyz.openbmc_project.Sensor.Value,Value,0xEE,6

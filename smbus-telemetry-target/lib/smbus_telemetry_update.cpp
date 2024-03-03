@@ -21,9 +21,10 @@ int smbusSlaveVer;
 bool isValidCSVData(std::vector<std::vector<std::string>>& csvData)
 {
     return(csvData[0][0] != "slave_version" || csvData[1][0] != "staleness_threshold"
-        || csvData[2][0] != "offset" || csvData[2][1] != "length" || csvData[2][2] != "dbus_objectpath"
-        || csvData[2][3] != "dbus_interface" || csvData[2][4] != "dbus_property" || csvData[2][5] != "stale_offset"
-        || csvData[2][6] != "stale_bit") ? false:true;
+        || csvData[2][0] != "offset" || csvData[2][1] != "length" 
+        || csvData[2][2] != "data_format" || csvData[2][3] != "dbus_objectpath" 
+        || csvData[2][4] != "dbus_interface" || csvData[2][5] != "dbus_property" 
+        || csvData[2][6] != "stale_offset" || csvData[2][7] != "stale_bit") ? false:true;
 }
 
 int loadFromCSV(const std::string& filename)
@@ -97,22 +98,22 @@ int loadFromCSV(const std::string& filename)
 
                 smbusSensorData.setSensorOffset(static_cast<uint16_t>(std::stoi(val[0], nullptr, 16)));
                 smbusSensorData.setOffsetDataLength(stoi(val[1]));
-                smbusSensorData.setDbusObjPath(val[2]);
-                smbusSensorData.setDbusIface(val[3]);
-                smbusSensorData.setDbusProperty(val[4]);
+                smbusSensorData.setDbusObjPath(val[3]);
+                smbusSensorData.setDbusIface(val[4]);
+                smbusSensorData.setDbusProperty(val[5]);
 
-                if (val[5] != "NA")
+                if (val[6] != "NA")
                 {
-                    smbusSensorData.setStaleOffset(static_cast<int>(std::stoi(val[5], nullptr, 16)));
+                    smbusSensorData.setStaleOffset(static_cast<int>(std::stoi(val[6], nullptr, 16)));
                 }
                 else
                 {
                     smbusSensorData.setStaleOffset(-1);
                 }
 
-                if (val[6] != "NA")
+                if (val[7] != "NA")
                 {
-                    smbusSensorData.setStaleBit(stoi(val[6]));
+                    smbusSensorData.setStaleBit(stoi(val[7]));
                 }
                 else
                 {
