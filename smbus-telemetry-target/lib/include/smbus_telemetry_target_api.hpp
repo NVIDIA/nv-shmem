@@ -9,8 +9,6 @@
  */
 #pragma once
 
-#include <phosphor-logging/lg2.hpp>
-
 #include <string>
 #include <vector>
 

@@ -9,6 +9,7 @@
  */
 
 #include "smbus_telemetry_update.hpp"
+#include "error.hpp"
 
 namespace smbus_telemetry_update
 {
@@ -56,13 +57,13 @@ int loadFromCSV(const std::string& filename)
             lg2::error(
                 "SMBus Slave Telemetry Config CSV file not found: {FILENAME}",
                 "FILENAME", filename);
-            return -1;
+            return ErrorCode::ConfigFileNotFound;
         }
 
         if (!isValidCSVData(smbusDetails))
         {
             lg2::error("Invalid record on csv file");
-            return -1;
+            return ErrorCode::InvalidConfigData;
         }
 
         int smbusSensorDataCount = 0;
@@ -90,7 +91,7 @@ int loadFromCSV(const std::string& filename)
                 {
                     lg2::error("Invalid smbus sensor data: {RECORDSIZE}",
                     "RECORDSIZE", val.size());
-                    return -1;
+                    return ErrorCode::InvalidConfigData;
                 }
                 SmbusSensorData smbusSensorData;
 
@@ -133,7 +134,7 @@ int loadFromCSV(const std::string& filename)
     {
         lg2::error("SMBus slave telemetry init failed {EXCEPTION}", "EXCEPTION",
                    e.what());
-        return -1;
+        return ErrorCode::FaildToLoadCSV;
     }
 
     return 0;
@@ -147,9 +148,8 @@ int smbusSlaveUpdate(std::string dbusObjPath, std::string iface,
     
     if (sensorDataMap.find(key) == sensorDataMap.end())
     {
-        lg2::error("SMBus slave telemetry sensor detail not found: {KEY}",
-                   "KEY", key);
-        return -1;
+	// SmbusUpdate sensor configuration not supported.
+        return 0;
     }
 
     std::fstream eepromFile(i2cSlaveSysfs);
@@ -158,7 +158,7 @@ int smbusSlaveUpdate(std::string dbusObjPath, std::string iface,
         lg2::error(
             "SMBus slave telemetry eeprom file not found : {I2CSLAVESYSFS}",
             "I2CSLAVESYSFS", i2cSlaveSysfs);
-        return -1;
+        return ErrorCode::SMBusSysfsPathNotFound;
     }
     // To avoid stale value on init
     if (sensorDataMap[key].initTs == true)
@@ -206,7 +206,7 @@ int smbusSlaveUpdate(std::string dbusObjPath, std::string iface,
         {
             // read
             uint8_t existingStaleValue = 0;
-            eepromFile.seekp(sensorDataMap[key].getSensorOffset());
+            eepromFile.seekp(sensorDataMap[key].getStaleOffset());
             eepromFile.read(reinterpret_cast<char*>(&existingStaleValue),
                             sizeof(existingStaleValue));
 

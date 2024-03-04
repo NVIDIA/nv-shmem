@@ -9,23 +9,23 @@ TEST(SmbusTelemetryUpdateApi_1, loadFromCSV)
 {
     // Test case for init failure
     int rc = smbus_telemetry_update::loadFromCSV("./wrong-fileName.csv");
-    EXPECT_EQ(rc, -1);
+    EXPECT_EQ(rc, 0x0100);
 
     // Invalid data in row1 of csv configuration
     rc = smbus_telemetry_update::loadFromCSV("../smbus-telemetry-target/test/config/row1-failure.csv");
-    EXPECT_EQ(rc, -1);
+    EXPECT_EQ(rc, 0x0101);
 
     // Invalid data in row2 of csv configuration
     rc = smbus_telemetry_update::loadFromCSV("../smbus-telemetry-target/test/config/row1-failure.csv");
-    EXPECT_EQ(rc, -1);
+    EXPECT_EQ(rc, 0x0101);
 
     // Invalid data in row3 of csv configuration
     rc = smbus_telemetry_update::loadFromCSV("../smbus-telemetry-target/test/config/row1-failure.csv");
-    EXPECT_EQ(rc, -1);
+    EXPECT_EQ(rc, 0x0101);
 
     // Invalid data in row4 of csv configuration
     rc = smbus_telemetry_update::loadFromCSV("../smbus-telemetry-target/test/config/row1-failure.csv");
-    EXPECT_EQ(rc, -1);
+    EXPECT_EQ(rc, 0x0101);
 
     // Test case for init success
     rc = smbus_telemetry_update::loadFromCSV("../smbus-telemetry-target/test/config/smbus-telemetry-config.csv");
@@ -44,7 +44,7 @@ TEST(SmbusTelemetryUpdateApi_2, smbusSlaveUpdate)
     // call smbusSlaveUpdate with wrong data
     int rc = smbus_telemetry_update::smbusSlaveUpdate(dbusObjPath, iface,propName,
                                                             val, ts, retVal);
-    EXPECT_EQ(rc, -1);
+    EXPECT_EQ(rc, 0);
 }
 
 TEST(SmbusTelemetryTargetApi_1, smbusSlaveInit)
