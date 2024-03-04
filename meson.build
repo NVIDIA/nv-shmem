@@ -28,10 +28,3 @@ endif
 if not get_option('tests').disabled()
     subdir('test')
 endif
-
-if not get_option('smbus-telemetry-target').disabled()
-  subdir('smbus-telemetry-target')
-  if not get_option('libsmbus-test').disabled()
-    subdir('smbus-telemetry-target/test')
-  endif
-endif
