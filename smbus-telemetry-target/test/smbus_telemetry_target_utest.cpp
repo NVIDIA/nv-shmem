@@ -16,15 +16,43 @@ TEST(SmbusTelemetryUpdateApi_1, loadFromCSV)
     EXPECT_EQ(rc, 0x0101);
 
     // Invalid data in row2 of csv configuration
-    rc = smbus_telemetry_update::loadFromCSV("../smbus-telemetry-target/test/config/row1-failure.csv");
+    rc = smbus_telemetry_update::loadFromCSV("../smbus-telemetry-target/test/config/row2-failure.csv");
     EXPECT_EQ(rc, 0x0101);
 
-    // Invalid data in row3 of csv configuration
-    rc = smbus_telemetry_update::loadFromCSV("../smbus-telemetry-target/test/config/row1-failure.csv");
+    // Invalid data in row3 wrong offset field on  csv configuration
+    rc = smbus_telemetry_update::loadFromCSV("../smbus-telemetry-target/test/config/row3-failure-wrong-offset.csv");
+    EXPECT_EQ(rc, 0x0101);
+
+    // Invalid data in row3 wrong length field on csv configuration
+    rc = smbus_telemetry_update::loadFromCSV("../smbus-telemetry-target/test/config/row3-failure-wrong-length.csv");
+    EXPECT_EQ(rc, 0x0101);
+
+    // Invalid data in row3 wrong data_format field on csv configuration
+    rc = smbus_telemetry_update::loadFromCSV("../smbus-telemetry-target/test/config/row3-failure-wrong-dataformat.csv");
+    EXPECT_EQ(rc, 0x0101);
+
+    // Invalid data in row3 wrong dbus_object field on csv configuration
+    rc = smbus_telemetry_update::loadFromCSV("../smbus-telemetry-target/test/config/row3-failure-wrong-dbusobjpath.csv");
+    EXPECT_EQ(rc, 0x0101);
+
+    // Invalid data in row3 wrong dbus_interface field on csv configuration
+    rc = smbus_telemetry_update::loadFromCSV("../smbus-telemetry-target/test/config/row3-failure-wrong-dbusiface.csv");
+    EXPECT_EQ(rc, 0x0101);
+
+    // Invalid data in row3 wrong data_property field on csv configuration
+    rc = smbus_telemetry_update::loadFromCSV("../smbus-telemetry-target/test/config/row3-failure-wrong-dbusproperty.csv");
+    EXPECT_EQ(rc, 0x0101);
+
+    // Invalid data in row3 wrong stale_offset field on csv configuration
+    rc = smbus_telemetry_update::loadFromCSV("../smbus-telemetry-target/test/config/row3-failure-wrong-stalebit.csv");
+    EXPECT_EQ(rc, 0x0101);
+
+    // Invalid data in row3 wrong stale_bit field on csv configuration
+    rc = smbus_telemetry_update::loadFromCSV("../smbus-telemetry-target/test/config/row3-failure-wrong-staleoffset.csv");
     EXPECT_EQ(rc, 0x0101);
 
     // Invalid data in row4 of csv configuration
-    rc = smbus_telemetry_update::loadFromCSV("../smbus-telemetry-target/test/config/row1-failure.csv");
+    rc = smbus_telemetry_update::loadFromCSV("../smbus-telemetry-target/test/config/row4-failure.csv");
     EXPECT_EQ(rc, 0x0101);
 
     // Test case for init success
