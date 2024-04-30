@@ -56,6 +56,8 @@ namespace sensor_aggregation {
  */
 std::vector<SensorValue> getAllMRDValues(const std::string &mrdNamespace);
 
+std::vector<std::string> getMrdNamespacesValues();
+
 /**
  * @brief This exception should be thrown when name space is not found in shared
  * memory.

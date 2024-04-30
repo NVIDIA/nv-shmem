@@ -75,6 +75,17 @@ vector<SensorValue> getAllMRDValues(const string &mrdNamespace) {
     throw NameSpaceNotFoundException();
   }
 }
+
+vector<string> getMrdNamespacesValues() {
+  static unordered_map<string, vector<string>> mrdNamespaceLookup = 
+    ConfigReader::getMRDNamespaceLookup();
+  vector<string> mrd;
+  for (const auto &pair : mrdNamespaceLookup) {
+    mrd.push_back(pair.first);
+  }
+  return mrd;
+}
+
 } // namespace sensor_aggregation
 } // namespace shmem
 } // namespace nv
