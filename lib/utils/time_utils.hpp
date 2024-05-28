@@ -1,6 +1,6 @@
 /*
- * SPDX-FileCopyrightText: Copyright (c) 2023-2024 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
- * SPDX-License-Identifier: Apache-2.0
+ * SPDX-FileCopyrightText: Copyright (c) 2023-2024 NVIDIA CORPORATION &
+ * AFFILIATES. All rights reserved. SPDX-License-Identifier: Apache-2.0
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,6 +17,8 @@
 
 #pragma once
 
+#include <phosphor-logging/lg2.hpp>
+
 #include <algorithm>
 #include <charconv>
 #include <chrono>
@@ -25,7 +27,6 @@
 #include <cstddef>
 #include <cstdint>
 #include <optional>
-#include <phosphor-logging/lg2.hpp>
 #include <ratio>
 #include <string>
 #include <string_view>
@@ -37,10 +38,14 @@
 
 using namespace std;
 
-namespace nv {
-namespace sensor_aggregation {
-namespace metricUtils {
-namespace details {
+namespace nv
+{
+namespace sensor_aggregation
+{
+namespace metricUtils
+{
+namespace details
+{
 
 constexpr intmax_t dayDuration = static_cast<intmax_t>(24 * 60 * 60);
 using Days = chrono::duration<long long, ratio<dayDuration>>;
@@ -54,13 +59,15 @@ using Days = chrono::duration<long long, ratio<dayDuration>>;
  * @param[in] pad
  * @return string
  */
-inline string padZeros(int64_t value, size_t pad) {
-  string result(pad, '0');
-  for (int64_t val = value; pad > 0; pad--) {
-    result[pad - 1] = static_cast<char>('0' + val % 10);
-    val /= 10;
-  }
-  return result;
+inline string padZeros(int64_t value, size_t pad)
+{
+    string result(pad, '0');
+    for (int64_t val = value; pad > 0; pad--)
+    {
+        result[pad - 1] = static_cast<char>('0' + val % 10);
+        val /= 10;
+    }
+    return result;
 }
 
 /**
@@ -74,49 +81,59 @@ inline string padZeros(int64_t value, size_t pad) {
  * @return false
  */
 template <typename FromTime>
-bool fromDurationItem(string_view &fmt, const char postfix,
-                      chrono::milliseconds &out) {
-  const size_t pos = fmt.find(postfix);
-  if (pos == string::npos) {
+bool fromDurationItem(string_view& fmt, const char postfix,
+                      chrono::milliseconds& out)
+{
+    const size_t pos = fmt.find(postfix);
+    if (pos == string::npos)
+    {
+        return true;
+    }
+    if ((pos + 1U) > fmt.size())
+    {
+        return false;
+    }
+
+    const char* end = nullptr;
+    chrono::milliseconds::rep ticks = 0;
+    if constexpr (is_same_v<FromTime, chrono::milliseconds>)
+    {
+        end = fmt.data() + min<size_t>(pos, 3U);
+    }
+    else
+    {
+        end = fmt.data() + pos;
+    }
+
+    auto [ptr, ec] = from_chars(fmt.data(), end, ticks);
+    if (ptr != end || ec != errc())
+    {
+        lg2::error("SHMEMDEBUG: Failed to convert string to decimal with err: "
+                   "{CONV_ERROR}",
+                   "CONV_ERROR", static_cast<int>(ec));
+        return false;
+    }
+
+    if constexpr (is_same_v<FromTime, chrono::milliseconds>)
+    {
+        ticks *= static_cast<chrono::milliseconds::rep>(
+            pow(10, 3 - min<size_t>(pos, 3U)));
+    }
+    if (ticks < 0)
+    {
+        return false;
+    }
+
+    out += FromTime(ticks);
+    const auto maxConversionRange =
+        chrono::duration_cast<FromTime>(chrono::milliseconds::max()).count();
+    if (out < FromTime(ticks) || maxConversionRange < ticks)
+    {
+        return false;
+    }
+
+    fmt.remove_prefix(pos + 1U);
     return true;
-  }
-  if ((pos + 1U) > fmt.size()) {
-    return false;
-  }
-
-  const char *end = nullptr;
-  chrono::milliseconds::rep ticks = 0;
-  if constexpr (is_same_v<FromTime, chrono::milliseconds>) {
-    end = fmt.data() + min<size_t>(pos, 3U);
-  } else {
-    end = fmt.data() + pos;
-  }
-
-  auto [ptr, ec] = from_chars(fmt.data(), end, ticks);
-  if (ptr != end || ec != errc()) {
-    lg2::error("SHMEMDEBUG: Failed to convert string to decimal with err: "
-               "{CONV_ERROR}",
-               "CONV_ERROR", static_cast<int>(ec));
-    return false;
-  }
-
-  if constexpr (is_same_v<FromTime, chrono::milliseconds>) {
-    ticks *= static_cast<chrono::milliseconds::rep>(
-        pow(10, 3 - min<size_t>(pos, 3U)));
-  }
-  if (ticks < 0) {
-    return false;
-  }
-
-  out += FromTime(ticks);
-  const auto maxConversionRange =
-      chrono::duration_cast<FromTime>(chrono::milliseconds::max()).count();
-  if (out < FromTime(ticks) || maxConversionRange < ticks) {
-    return false;
-  }
-
-  fmt.remove_prefix(pos + 1U);
-  return true;
 }
 } // namespace details
 
@@ -127,62 +144,75 @@ bool fromDurationItem(string_view &fmt, const char postfix,
  * @param str
  * @return optional<chrono::milliseconds>
  */
-inline optional<chrono::milliseconds> fromDurationString(const string &str) {
-  chrono::milliseconds out = chrono::milliseconds::zero();
-  string_view v = str;
+inline optional<chrono::milliseconds> fromDurationString(const string& str)
+{
+    chrono::milliseconds out = chrono::milliseconds::zero();
+    string_view v = str;
 
-  if (v.empty()) {
-    return out;
-  }
-  if (v.front() != 'P') {
-    lg2::error("SHMEMDEBUG: Invalid duration format: {INVALID_DURATION}",
-               "INVALID_DURATION", str);
-    return nullopt;
-  }
-
-  v.remove_prefix(1);
-  if (!details::fromDurationItem<details::Days>(v, 'D', out)) {
-    lg2::error("SHMEMDEBUG: Invalid duration format: {INVALID_DURATION}",
-               "INVALID_DURATION", str);
-    return nullopt;
-  }
-
-  if (v.empty()) {
-    return out;
-  }
-  if (v.front() != 'T') {
-    lg2::error("SHMEMDEBUG: Invalid duration format: {INVALID_DURATION}",
-               "INVALID_DURATION", str);
-    return nullopt;
-  }
-
-  v.remove_prefix(1);
-  if (!details::fromDurationItem<chrono::hours>(v, 'H', out) ||
-      !details::fromDurationItem<chrono::minutes>(v, 'M', out)) {
-    lg2::error("SHMEMDEBUG: Invalid duration format: {INVALID_DURATION}",
-               "INVALID_DURATION", str);
-    return nullopt;
-  }
-
-  if (v.find('.') != string::npos && v.find('S') != string::npos) {
-    if (!details::fromDurationItem<chrono::seconds>(v, '.', out) ||
-        !details::fromDurationItem<chrono::milliseconds>(v, 'S', out)) {
-      lg2::error("SHMEMDEBUG: Invalid duration format: {INVALID_DURATION}",
-                 "INVALID_DURATION", str);
-      return nullopt;
+    if (v.empty())
+    {
+        return out;
     }
-  } else if (!details::fromDurationItem<chrono::seconds>(v, 'S', out)) {
-    lg2::error("SHMEMDEBUG: Invalid duration format: {INVALID_DURATION}",
-               "INVALID_DURATION", str);
-    return nullopt;
-  }
+    if (v.front() != 'P')
+    {
+        lg2::error("SHMEMDEBUG: Invalid duration format: {INVALID_DURATION}",
+                   "INVALID_DURATION", str);
+        return nullopt;
+    }
 
-  if (!v.empty()) {
-    lg2::error("SHMEMDEBUG: Invalid duration format: {INVALID_DURATION}",
-               "INVALID_DURATION", str);
-    return nullopt;
-  }
-  return out;
+    v.remove_prefix(1);
+    if (!details::fromDurationItem<details::Days>(v, 'D', out))
+    {
+        lg2::error("SHMEMDEBUG: Invalid duration format: {INVALID_DURATION}",
+                   "INVALID_DURATION", str);
+        return nullopt;
+    }
+
+    if (v.empty())
+    {
+        return out;
+    }
+    if (v.front() != 'T')
+    {
+        lg2::error("SHMEMDEBUG: Invalid duration format: {INVALID_DURATION}",
+                   "INVALID_DURATION", str);
+        return nullopt;
+    }
+
+    v.remove_prefix(1);
+    if (!details::fromDurationItem<chrono::hours>(v, 'H', out) ||
+        !details::fromDurationItem<chrono::minutes>(v, 'M', out))
+    {
+        lg2::error("SHMEMDEBUG: Invalid duration format: {INVALID_DURATION}",
+                   "INVALID_DURATION", str);
+        return nullopt;
+    }
+
+    if (v.find('.') != string::npos && v.find('S') != string::npos)
+    {
+        if (!details::fromDurationItem<chrono::seconds>(v, '.', out) ||
+            !details::fromDurationItem<chrono::milliseconds>(v, 'S', out))
+        {
+            lg2::error(
+                "SHMEMDEBUG: Invalid duration format: {INVALID_DURATION}",
+                "INVALID_DURATION", str);
+            return nullopt;
+        }
+    }
+    else if (!details::fromDurationItem<chrono::seconds>(v, 'S', out))
+    {
+        lg2::error("SHMEMDEBUG: Invalid duration format: {INVALID_DURATION}",
+                   "INVALID_DURATION", str);
+        return nullopt;
+    }
+
+    if (!v.empty())
+    {
+        lg2::error("SHMEMDEBUG: Invalid duration format: {INVALID_DURATION}",
+                   "INVALID_DURATION", str);
+        return nullopt;
+    }
+    return out;
 }
 
 /**
@@ -192,46 +222,54 @@ inline optional<chrono::milliseconds> fromDurationString(const string &str) {
  * @param[in] ms - time in milliseconds
  * @return string
  */
-inline string toDurationString(chrono::milliseconds ms) {
-  if (ms < chrono::milliseconds::zero()) {
-    return "";
-  }
+inline string toDurationString(chrono::milliseconds ms)
+{
+    if (ms < chrono::milliseconds::zero())
+    {
+        return "";
+    }
 
-  string fmt;
-  fmt.reserve(sizeof("PxxxxxxxxxxxxDTxxHxxMxx.xxxxxxS"));
+    string fmt;
+    fmt.reserve(sizeof("PxxxxxxxxxxxxDTxxHxxMxx.xxxxxxS"));
 
-  details::Days days = chrono::floor<details::Days>(ms);
-  ms -= days;
+    details::Days days = chrono::floor<details::Days>(ms);
+    ms -= days;
 
-  chrono::hours hours = chrono::floor<chrono::hours>(ms);
-  ms -= hours;
+    chrono::hours hours = chrono::floor<chrono::hours>(ms);
+    ms -= hours;
 
-  chrono::minutes minutes = chrono::floor<chrono::minutes>(ms);
-  ms -= minutes;
+    chrono::minutes minutes = chrono::floor<chrono::minutes>(ms);
+    ms -= minutes;
 
-  chrono::seconds seconds = chrono::floor<chrono::seconds>(ms);
-  ms -= seconds;
+    chrono::seconds seconds = chrono::floor<chrono::seconds>(ms);
+    ms -= seconds;
 
-  fmt = "P";
-  if (days.count() > 0) {
-    fmt += to_string(days.count()) + "D";
-  }
-  fmt += "T";
-  if (hours.count() > 0) {
-    fmt += to_string(hours.count()) + "H";
-  }
-  if (minutes.count() > 0) {
-    fmt += to_string(minutes.count()) + "M";
-  }
-  if (seconds.count() != 0 || ms.count() != 0) {
-    fmt += to_string(seconds.count()) + ".";
-    fmt += details::padZeros(ms.count(), 3);
-    fmt += "S";
-  } else if (fmt == "PT") {
-    fmt += "0S"; // Append "0S" when time is zero seconds
-  }
+    fmt = "P";
+    if (days.count() > 0)
+    {
+        fmt += to_string(days.count()) + "D";
+    }
+    fmt += "T";
+    if (hours.count() > 0)
+    {
+        fmt += to_string(hours.count()) + "H";
+    }
+    if (minutes.count() > 0)
+    {
+        fmt += to_string(minutes.count()) + "M";
+    }
+    if (seconds.count() != 0 || ms.count() != 0)
+    {
+        fmt += to_string(seconds.count()) + ".";
+        fmt += details::padZeros(ms.count(), 3);
+        fmt += "S";
+    }
+    else if (fmt == "PT")
+    {
+        fmt += "0S"; // Append "0S" when time is zero seconds
+    }
 
-  return fmt;
+    return fmt;
 }
 
 /**
@@ -240,23 +278,27 @@ inline string toDurationString(chrono::milliseconds ms) {
  * @param[in] ms - time in milliseconds
  * @return string
  */
-inline optional<string> toDurationStringFromUint(const uint64_t timeMs) {
-  static const uint64_t maxTimeMs =
-      static_cast<uint64_t>(chrono::milliseconds::max().count());
+inline optional<string> toDurationStringFromUint(const uint64_t timeMs)
+{
+    static const uint64_t maxTimeMs =
+        static_cast<uint64_t>(chrono::milliseconds::max().count());
 
-  if (maxTimeMs < timeMs) {
-    return nullopt;
-  }
+    if (maxTimeMs < timeMs)
+    {
+        return nullopt;
+    }
 
-  string duration = toDurationString(chrono::milliseconds(timeMs));
-  if (duration.empty()) {
-    return nullopt;
-  }
+    string duration = toDurationString(chrono::milliseconds(timeMs));
+    if (duration.empty())
+    {
+        return nullopt;
+    }
 
-  return make_optional(duration);
+    return make_optional(duration);
 }
 
-namespace details {
+namespace details
+{
 // Returns year/month/day triple in civil calendar
 // Preconditions:  z is number of days since 1970-01-01 and is in the range:
 //                   [numeric_limits<Int>::min(),
@@ -265,19 +307,20 @@ namespace details {
 // https://howardhinnant.github.io/date_algorithms.html#civil_from_days
 // All constants are explained in the above
 template <class IntType>
-constexpr tuple<IntType, unsigned, unsigned> civilFromDays(IntType z) noexcept {
-  z += 719468;
-  IntType era = (z >= 0 ? z : z - 146096) / 146097;
-  unsigned doe = static_cast<unsigned>(z - era * 146097); // [0, 146096]
-  unsigned yoe =
-      (doe - doe / 1460 + doe / 36524 - doe / 146096) / 365; // [0, 399]
-  IntType y = static_cast<IntType>(yoe) + era * 400;
-  unsigned doy = doe - (365 * yoe + yoe / 4 - yoe / 100); // [0, 365]
-  unsigned mp = (5 * doy + 2) / 153;                      // [0, 11]
-  unsigned d = doy - (153 * mp + 2) / 5 + 1;              // [1, 31]
-  unsigned m = mp < 10 ? mp + 3 : mp - 9;                 // [1, 12]
+constexpr tuple<IntType, unsigned, unsigned> civilFromDays(IntType z) noexcept
+{
+    z += 719468;
+    IntType era = (z >= 0 ? z : z - 146096) / 146097;
+    unsigned doe = static_cast<unsigned>(z - era * 146097); // [0, 146096]
+    unsigned yoe = (doe - doe / 1460 + doe / 36524 - doe / 146096) /
+                   365;                                     // [0, 399]
+    IntType y = static_cast<IntType>(yoe) + era * 400;
+    unsigned doy = doe - (365 * yoe + yoe / 4 - yoe / 100); // [0, 365]
+    unsigned mp = (5 * doy + 2) / 153;                      // [0, 11]
+    unsigned d = doy - (153 * mp + 2) / 5 + 1;              // [1, 31]
+    unsigned m = mp < 10 ? mp + 3 : mp - 9;                 // [1, 12]
 
-  return tuple<IntType, unsigned, unsigned>(y + (m <= 2), m, d);
+    return tuple<IntType, unsigned, unsigned>(y + (m <= 2), m, d);
 }
 
 /**
@@ -289,74 +332,81 @@ constexpr tuple<IntType, unsigned, unsigned> civilFromDays(IntType z) noexcept {
  * @return string
  */
 template <typename IntType, typename Period>
-string toISO8061ExtendedStr(chrono::duration<IntType, Period> t) {
-  using seconds = chrono::duration<int>;
-  using minutes = chrono::duration<int, ratio<60>>;
-  using hours = chrono::duration<int, ratio<3600>>;
-  using days =
-      chrono::duration<IntType, ratio_multiply<hours::period, ratio<24>>>;
+string toISO8061ExtendedStr(chrono::duration<IntType, Period> t)
+{
+    using seconds = chrono::duration<int>;
+    using minutes = chrono::duration<int, ratio<60>>;
+    using hours = chrono::duration<int, ratio<3600>>;
+    using days =
+        chrono::duration<IntType, ratio_multiply<hours::period, ratio<24>>>;
 
-  // d is days since 1970-01-01
-  days d = chrono::duration_cast<days>(t);
+    // d is days since 1970-01-01
+    days d = chrono::duration_cast<days>(t);
 
-  // t is now time duration since midnight of day d
-  t -= d;
+    // t is now time duration since midnight of day d
+    t -= d;
 
-  // break d down into year/month/day
-  int year = 0;
-  int month = 0;
-  int day = 0;
-  tie(year, month, day) = details::civilFromDays(d.count());
-  // Check against limits.  Can't go above year 9999, and can't go below epoch
-  // (1970)
-  if (year >= 10000) {
-    year = 9999;
-    month = 12;
-    day = 31;
-    t = days(1) - chrono::duration<IntType, Period>(1);
-  } else if (year < 1970) {
-    year = 1970;
-    month = 1;
-    day = 1;
-    t = chrono::duration<IntType, Period>::zero();
-  }
+    // break d down into year/month/day
+    int year = 0;
+    int month = 0;
+    int day = 0;
+    tie(year, month, day) = details::civilFromDays(d.count());
+    // Check against limits.  Can't go above year 9999, and can't go below epoch
+    // (1970)
+    if (year >= 10000)
+    {
+        year = 9999;
+        month = 12;
+        day = 31;
+        t = days(1) - chrono::duration<IntType, Period>(1);
+    }
+    else if (year < 1970)
+    {
+        year = 1970;
+        month = 1;
+        day = 1;
+        t = chrono::duration<IntType, Period>::zero();
+    }
 
-  string out;
-  out += details::padZeros(year, 4);
-  out += '-';
-  out += details::padZeros(month, 2);
-  out += '-';
-  out += details::padZeros(day, 2);
-  out += 'T';
-  hours hr = chrono::duration_cast<hours>(t);
-  out += details::padZeros(hr.count(), 2);
-  t -= hr;
-  out += ':';
+    string out;
+    out += details::padZeros(year, 4);
+    out += '-';
+    out += details::padZeros(month, 2);
+    out += '-';
+    out += details::padZeros(day, 2);
+    out += 'T';
+    hours hr = chrono::duration_cast<hours>(t);
+    out += details::padZeros(hr.count(), 2);
+    t -= hr;
+    out += ':';
 
-  minutes mt = chrono::duration_cast<minutes>(t);
-  out += details::padZeros(mt.count(), 2);
-  t -= mt;
-  out += ':';
+    minutes mt = chrono::duration_cast<minutes>(t);
+    out += details::padZeros(mt.count(), 2);
+    t -= mt;
+    out += ':';
 
-  seconds se = chrono::duration_cast<seconds>(t);
-  out += details::padZeros(se.count(), 2);
-  t -= se;
+    seconds se = chrono::duration_cast<seconds>(t);
+    out += details::padZeros(se.count(), 2);
+    t -= se;
 
-  if constexpr (is_same_v<typename decltype(t)::period, milli>) {
-    out += '.';
-    using MilliDuration = chrono::duration<int, milli>;
-    MilliDuration subsec = chrono::duration_cast<MilliDuration>(t);
-    out += details::padZeros(subsec.count(), 3);
-  } else if constexpr (is_same_v<typename decltype(t)::period, micro>) {
-    out += '.';
+    if constexpr (is_same_v<typename decltype(t)::period, milli>)
+    {
+        out += '.';
+        using MilliDuration = chrono::duration<int, milli>;
+        MilliDuration subsec = chrono::duration_cast<MilliDuration>(t);
+        out += details::padZeros(subsec.count(), 3);
+    }
+    else if constexpr (is_same_v<typename decltype(t)::period, micro>)
+    {
+        out += '.';
 
-    using MicroDuration = chrono::duration<int, micro>;
-    MicroDuration subsec = chrono::duration_cast<MicroDuration>(t);
-    out += details::padZeros(subsec.count(), 6);
-  }
+        using MicroDuration = chrono::duration<int, micro>;
+        MicroDuration subsec = chrono::duration_cast<MicroDuration>(t);
+        out += details::padZeros(subsec.count(), 6);
+    }
 
-  out += "+00:00";
-  return out;
+    out += "+00:00";
+    return out;
 }
 } // namespace details
 
@@ -368,10 +418,11 @@ string toISO8061ExtendedStr(chrono::duration<IntType, Period> t) {
  * @param[in] secondsSinceEpoch
  * @return string
  */
-inline string getDateTimeUint(uint64_t secondsSinceEpoch) {
-  using DurationType = chrono::duration<uint64_t>;
-  DurationType sinceEpoch(secondsSinceEpoch);
-  return details::toISO8061ExtendedStr(sinceEpoch);
+inline string getDateTimeUint(uint64_t secondsSinceEpoch)
+{
+    using DurationType = chrono::duration<uint64_t>;
+    DurationType sinceEpoch(secondsSinceEpoch);
+    return details::toISO8061ExtendedStr(sinceEpoch);
 }
 
 /**
@@ -382,10 +433,11 @@ inline string getDateTimeUint(uint64_t secondsSinceEpoch) {
  * @param[in] milliSecondsSinceEpoch
  * @return string
  */
-inline string getDateTimeUintMs(uint64_t milliSecondsSinceEpoch) {
-  using DurationType = chrono::duration<uint64_t, milli>;
-  DurationType sinceEpoch(milliSecondsSinceEpoch);
-  return details::toISO8061ExtendedStr(sinceEpoch);
+inline string getDateTimeUintMs(uint64_t milliSecondsSinceEpoch)
+{
+    using DurationType = chrono::duration<uint64_t, milli>;
+    DurationType sinceEpoch(milliSecondsSinceEpoch);
+    return details::toISO8061ExtendedStr(sinceEpoch);
 }
 
 /**
@@ -394,10 +446,11 @@ inline string getDateTimeUintMs(uint64_t milliSecondsSinceEpoch) {
  * @param[in] microSecondsSinceEpoch
  * @return string
  */
-inline string getDateTimeUintUs(uint64_t microSecondsSinceEpoch) {
-  using DurationType = chrono::duration<uint64_t, micro>;
-  DurationType sinceEpoch(microSecondsSinceEpoch);
-  return details::toISO8061ExtendedStr(sinceEpoch);
+inline string getDateTimeUintUs(uint64_t microSecondsSinceEpoch)
+{
+    using DurationType = chrono::duration<uint64_t, micro>;
+    DurationType sinceEpoch(microSecondsSinceEpoch);
+    return details::toISO8061ExtendedStr(sinceEpoch);
 }
 
 /**
@@ -406,10 +459,11 @@ inline string getDateTimeUintUs(uint64_t microSecondsSinceEpoch) {
  * @param[in] secondsSinceEpoch
  * @return string
  */
-inline string getDateTimeStdtime(time_t secondsSinceEpoch) {
-  using DurationType = chrono::duration<time_t>;
-  DurationType sinceEpoch(secondsSinceEpoch);
-  return details::toISO8061ExtendedStr(sinceEpoch);
+inline string getDateTimeStdtime(time_t secondsSinceEpoch)
+{
+    using DurationType = chrono::duration<time_t>;
+    DurationType sinceEpoch(secondsSinceEpoch);
+    return details::toISO8061ExtendedStr(sinceEpoch);
 }
 
 /**
@@ -421,89 +475,104 @@ inline string getDateTimeStdtime(time_t secondsSinceEpoch) {
  * @return pair<string, string>, which consist
  * of current DateTime & the TimeOffset strings respectively.
  */
-inline pair<string, string> getDateTimeOffsetNow() {
-  time_t tmpTime = time(nullptr);
-  string dateTime = getDateTimeStdtime(tmpTime);
+inline pair<string, string> getDateTimeOffsetNow()
+{
+    time_t tmpTime = time(nullptr);
+    string dateTime = getDateTimeStdtime(tmpTime);
 
-  /* extract the local Time Offset value from the
-   * recevied dateTime string.
-   */
-  string timeOffset("Z00:00");
-  size_t lastPos = dateTime.size();
-  size_t len = timeOffset.size();
-  if (lastPos > len) {
-    timeOffset = dateTime.substr(lastPos - len);
-  }
+    /* extract the local Time Offset value from the
+     * recevied dateTime string.
+     */
+    string timeOffset("Z00:00");
+    size_t lastPos = dateTime.size();
+    size_t len = timeOffset.size();
+    if (lastPos > len)
+    {
+        timeOffset = dateTime.substr(lastPos - len);
+    }
 
-  return make_pair(dateTime, timeOffset);
+    return make_pair(dateTime, timeOffset);
 }
 
-inline time_t getTimestamp(uint64_t millisTimeStamp) {
-  // Retrieve Created property with format:
-  // yyyy-mm-ddThh:mm:ss
-  chrono::milliseconds chronoTimeStamp(millisTimeStamp);
-  return chrono::duration_cast<chrono::duration<int>>(chronoTimeStamp).count();
+inline time_t getTimestamp(uint64_t millisTimeStamp)
+{
+    // Retrieve Created property with format:
+    // yyyy-mm-ddThh:mm:ss
+    chrono::milliseconds chronoTimeStamp(millisTimeStamp);
+    return chrono::duration_cast<chrono::duration<int>>(chronoTimeStamp)
+        .count();
 }
 
-inline string nanoSecToDurationString(chrono::nanoseconds ns) {
-  if (ns < chrono::nanoseconds::zero()) {
-    return "";
-  }
+inline string nanoSecToDurationString(chrono::nanoseconds ns)
+{
+    if (ns < chrono::nanoseconds::zero())
+    {
+        return "";
+    }
 
-  string fmt;
-  fmt.reserve(sizeof("PxxxxxxxxxxxxDTxxHxxMxx.xxxxxxS"));
+    string fmt;
+    fmt.reserve(sizeof("PxxxxxxxxxxxxDTxxHxxMxx.xxxxxxS"));
 
-  details::Days days = chrono::floor<details::Days>(ns);
-  ns -= days;
+    details::Days days = chrono::floor<details::Days>(ns);
+    ns -= days;
 
-  chrono::hours hours = chrono::floor<chrono::hours>(ns);
-  ns -= hours;
+    chrono::hours hours = chrono::floor<chrono::hours>(ns);
+    ns -= hours;
 
-  chrono::minutes minutes = chrono::floor<chrono::minutes>(ns);
-  ns -= minutes;
+    chrono::minutes minutes = chrono::floor<chrono::minutes>(ns);
+    ns -= minutes;
 
-  chrono::seconds seconds = chrono::floor<chrono::seconds>(ns);
-  ns -= seconds;
+    chrono::seconds seconds = chrono::floor<chrono::seconds>(ns);
+    ns -= seconds;
 
-  fmt = "P";
-  if (days.count() > 0) {
-    fmt += to_string(days.count()) + "D";
-  }
-  fmt += "T";
-  if (hours.count() > 0) {
-    fmt += to_string(hours.count()) + "H";
-  }
-  if (minutes.count() > 0) {
-    fmt += to_string(minutes.count()) + "M";
-  }
+    fmt = "P";
+    if (days.count() > 0)
+    {
+        fmt += to_string(days.count()) + "D";
+    }
+    fmt += "T";
+    if (hours.count() > 0)
+    {
+        fmt += to_string(hours.count()) + "H";
+    }
+    if (minutes.count() > 0)
+    {
+        fmt += to_string(minutes.count()) + "M";
+    }
 
-  if (seconds.count() != 0 || ns.count() != 0) {
-    fmt += to_string(seconds.count()) + ".";
-    fmt += details::padZeros(ns.count(), 9);
-    fmt += "S";
-  } else if (fmt == "PT") {
-    fmt += "0S"; // Append "0S" when time is zero seconds
-  }
+    if (seconds.count() != 0 || ns.count() != 0)
+    {
+        fmt += to_string(seconds.count()) + ".";
+        fmt += details::padZeros(ns.count(), 9);
+        fmt += "S";
+    }
+    else if (fmt == "PT")
+    {
+        fmt += "0S"; // Append "0S" when time is zero seconds
+    }
 
-  return fmt;
+    return fmt;
 }
 
-inline optional<string> toDurationStringFromNano(const uint64_t timeNs) {
-  static const uint64_t maxTimeNs =
-      static_cast<uint64_t>(chrono::nanoseconds::max().count());
+inline optional<string> toDurationStringFromNano(const uint64_t timeNs)
+{
+    static const uint64_t maxTimeNs =
+        static_cast<uint64_t>(chrono::nanoseconds::max().count());
 
-  if (maxTimeNs < timeNs) {
-    return nullopt;
-  }
+    if (maxTimeNs < timeNs)
+    {
+        return nullopt;
+    }
 
-  chrono::nanoseconds nanosecs(timeNs);
+    chrono::nanoseconds nanosecs(timeNs);
 
-  string duration = nanoSecToDurationString(nanosecs);
-  if (duration.empty()) {
-    return nullopt;
-  }
+    string duration = nanoSecToDurationString(nanosecs);
+    if (duration.empty())
+    {
+        return nullopt;
+    }
 
-  return make_optional(duration);
+    return make_optional(duration);
 }
 
 } // namespace metricUtils

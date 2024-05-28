@@ -1,6 +1,6 @@
 /*
- * SPDX-FileCopyrightText: Copyright (c) 2023-2024 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
- * SPDX-License-Identifier: Apache-2.0
+ * SPDX-FileCopyrightText: Copyright (c) 2023-2024 NVIDIA CORPORATION &
+ * AFFILIATES. All rights reserved. SPDX-License-Identifier: Apache-2.0
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,16 +17,22 @@
 
 #pragma once
 #include "config.h"
+
 #include "port_utils.hpp"
 #include "time_utils.hpp"
+
 #include <shm_common.h>
+
 #include <unordered_map>
 
 using namespace std;
 
-namespace nv {
-namespace sensor_aggregation {
-namespace metricUtils {
+namespace nv
+{
+namespace sensor_aggregation
+{
+namespace metricUtils
+{
 
 // Property data structures for Shared memory updates
 using MetricProp = string;
@@ -236,15 +242,19 @@ static PDINameMap pdiNameMap = {
  * @param[in] metricName - metric name
  * @return string
  */
-inline string getPropertySuffix(const string &ifaceName,
-                                const string &metricName) {
-  string suffix;
-  if (pdiNameMap.find(ifaceName) != pdiNameMap.end()) {
-    if (pdiNameMap[ifaceName].find(metricName) != pdiNameMap[ifaceName].end()) {
-      return pdiNameMap[ifaceName][metricName];
+inline string getPropertySuffix(const string& ifaceName,
+                                const string& metricName)
+{
+    string suffix;
+    if (pdiNameMap.find(ifaceName) != pdiNameMap.end())
+    {
+        if (pdiNameMap[ifaceName].find(metricName) !=
+            pdiNameMap[ifaceName].end())
+        {
+            return pdiNameMap[ifaceName][metricName];
+        }
     }
-  }
-  return suffix;
+    return suffix;
 }
 
 /**
@@ -253,11 +263,13 @@ inline string getPropertySuffix(const string &ifaceName,
  * @param[in] reason
  * @return string
  */
-inline string toReasonType(const string &reason) {
-  if (reasonTypeMap.find(reason) != reasonTypeMap.end()) {
-    return reasonTypeMap[reason];
-  }
-  return "";
+inline string toReasonType(const string& reason)
+{
+    if (reasonTypeMap.find(reason) != reasonTypeMap.end())
+    {
+        return reasonTypeMap[reason];
+    }
+    return "";
 }
 
 /**
@@ -266,12 +278,14 @@ inline string toReasonType(const string &reason) {
  * @param[in] pcieType
  * @return string
  */
-inline string toPCIeType(const string &pcieType) {
-  if (pcieTypeMap.find(pcieType) != pcieTypeMap.end()) {
-    return pcieTypeMap[pcieType];
-  }
-  // Unknown or others
-  return "Unknown";
+inline string toPCIeType(const string& pcieType)
+{
+    if (pcieTypeMap.find(pcieType) != pcieTypeMap.end())
+    {
+        return pcieTypeMap[pcieType];
+    }
+    // Unknown or others
+    return "Unknown";
 }
 
 /**
@@ -280,12 +294,14 @@ inline string toPCIeType(const string &pcieType) {
  * @param[in] stateType
  * @return string
  */
-inline string getPowerStateType(const string &stateType) {
-  if (powerStateTypeMap.find(stateType) != powerStateTypeMap.end()) {
-    return powerStateTypeMap[stateType];
-  }
-  // Unknown or others
-  return "";
+inline string getPowerStateType(const string& stateType)
+{
+    if (powerStateTypeMap.find(stateType) != powerStateTypeMap.end())
+    {
+        return powerStateTypeMap[stateType];
+    }
+    // Unknown or others
+    return "";
 }
 
 /**
@@ -297,31 +313,44 @@ inline string getPowerStateType(const string &stateType) {
  * @param[in] reading - metric reading value
  * @return string
  */
-inline string translateReading(const string &ifaceName,
-                               const string &metricName,
-                               const string &reading) {
-  string metricValue;
-  if (ifaceName == "xyz.openbmc_project.State.ProcessorPerformance") {
-    if (metricName == "ThrottleReason") {
-      metricValue = toReasonType(reading);
+inline string translateReading(const string& ifaceName,
+                               const string& metricName, const string& reading)
+{
+    string metricValue;
+    if (ifaceName == "xyz.openbmc_project.State.ProcessorPerformance")
+    {
+        if (metricName == "ThrottleReason")
+        {
+            metricValue = toReasonType(reading);
+        }
     }
-  } else if (ifaceName == "xyz.openbmc_project.PCIe.PCIeECC") {
-    if (metricName == "PCIeType") {
-      metricValue = toPCIeType(reading);
+    else if (ifaceName == "xyz.openbmc_project.PCIe.PCIeECC")
+    {
+        if (metricName == "PCIeType")
+        {
+            metricValue = toPCIeType(reading);
+        }
     }
-  } else if (ifaceName == "xyz.openbmc_project.Inventory.Item.Port") {
-    if (metricName == "LinkStatus") {
-      metricValue = getLinkStatusType(reading);
+    else if (ifaceName == "xyz.openbmc_project.Inventory.Item.Port")
+    {
+        if (metricName == "LinkStatus")
+        {
+            metricValue = getLinkStatusType(reading);
+        }
     }
-  } else if (ifaceName ==
-             "xyz.openbmc_project.State.Decorator.OperationalStatus") {
-    if (metricName == "State") {
-      metricValue = getPowerStateType(reading);
+    else if (ifaceName ==
+             "xyz.openbmc_project.State.Decorator.OperationalStatus")
+    {
+        if (metricName == "State")
+        {
+            metricValue = getPowerStateType(reading);
+        }
     }
-  } else {
-    metricValue = reading;
-  }
-  return metricValue;
+    else
+    {
+        metricValue = reading;
+    }
+    return metricValue;
 }
 
 /**
@@ -336,108 +365,145 @@ inline string translateReading(const string &ifaceName,
  * @param[in] ifaceName
  * @return string
  */
-inline string generateURI(const string &deviceType, const string &deviceName,
-                          const string &subDeviceName, const string &devicePath,
-                          const string &metricName, const string &ifaceName) {
-  string metricURI;
-  string propSuffix;
-  // form redfish URI for sub device
-  if (deviceType == "PlatformEnvironmentMetrics") {
-    metricURI = "/redfish/v1/Chassis/";
-    metricURI += deviceName;
-    metricURI += "/Sensors/";
-    metricURI += subDeviceName;
-  } else if (deviceType == "ProcessorPortMetrics") {
-    metricURI = "/redfish/v1/Systems/" PLATFORMSYSTEMID;
-    metricURI += "/Processors/";
-    metricURI += deviceName;
-    metricURI += "/Ports/";
-    metricURI += subDeviceName;
-    propSuffix = getPropertySuffix(ifaceName, metricName);
-  } else if (deviceType == "ProcessorPortGPMMetrics") {
-    metricURI = "/redfish/v1/Systems/" PLATFORMSYSTEMID;
-    metricURI += "/Processors/";
-    metricURI += deviceName;
-    metricURI += "/Ports/";
-    metricURI += subDeviceName;
-    metricURI += "/Metrics#";
-    propSuffix = getPropertySuffix(ifaceName, metricName);
-  } else if (deviceType == "NVSwitchPortMetrics") {
-    metricURI = "/redfish/v1/Fabrics/" PLATFORMDEVICEPREFIX;
-    metricURI += "NVLinkFabric_0/Switches/";
-    metricURI += deviceName;
-    metricURI += "/Ports/";
-    metricURI += subDeviceName;
-    propSuffix = getPropertySuffix(ifaceName, metricName);
-  } else if (deviceType == "ProcessorMetrics") {
-    metricURI = "/redfish/v1/Systems/" PLATFORMSYSTEMID;
-    metricURI += "/Processors/";
-    metricURI += deviceName;
-    metricURI += "/ProcessorMetrics#";
-    if (ifaceName == "xyz.openbmc_project.Memory.MemoryECC") {
-      metricURI += "/CacheMetricsTotal/LifeTime";
-    } else if (ifaceName == "xyz.openbmc_project.PCIe.PCIeECC") {
-      if (metricName == "PCIeType" || metricName == "MaxLanes" ||
-          metricName == "LanesInUse") {
-        sdbusplus::message::object_path deviceObjectPath(devicePath);
-        const string childDeviceName = deviceObjectPath.filename();
-        string parentDeviceName = PLATFORMDEVICEPREFIX;
-        parentDeviceName += childDeviceName;
+inline string generateURI(const string& deviceType, const string& deviceName,
+                          const string& subDeviceName, const string& devicePath,
+                          const string& metricName, const string& ifaceName)
+{
+    string metricURI;
+    string propSuffix;
+    // form redfish URI for sub device
+    if (deviceType == "PlatformEnvironmentMetrics")
+    {
         metricURI = "/redfish/v1/Chassis/";
-        metricURI += parentDeviceName;
-        metricURI += "/PCIeDevices/";
-        metricURI += childDeviceName;
-      }
-    } else if (ifaceName ==
-               "xyz.openbmc_project.State.Decorator.OperationalStatus") {
-      metricURI = "/redfish/v1/Systems/" PLATFORMSYSTEMID;
-      metricURI += "/Processors/";
-      metricURI += deviceName;
+        metricURI += deviceName;
+        metricURI += "/Sensors/";
+        metricURI += subDeviceName;
     }
-    propSuffix = getPropertySuffix(ifaceName, metricName);
-  } else if (deviceType == "ProcessorGPMMetrics") {
-    metricURI = "/redfish/v1/Systems/" PLATFORMSYSTEMID;
-    metricURI += "/Processors/";
-    metricURI += deviceName;
-    metricURI += "/ProcessorMetrics#";
-    propSuffix = getPropertySuffix(ifaceName, metricName);
-  } else if (deviceType == "NVSwitchMetrics") {
-    metricURI = "/redfish/v1/Fabrics/" PLATFORMDEVICEPREFIX;
-    metricURI += "NVLinkFabric_0/Switches/";
-    metricURI += deviceName;
-    metricURI += "/SwitchMetrics#";
-    if (ifaceName == "xyz.openbmc_project.Memory.MemoryECC") {
-      metricURI += "/InternalMemoryMetrics/LifeTime";
+    else if (deviceType == "ProcessorPortMetrics")
+    {
+        metricURI = "/redfish/v1/Systems/" PLATFORMSYSTEMID;
+        metricURI += "/Processors/";
+        metricURI += deviceName;
+        metricURI += "/Ports/";
+        metricURI += subDeviceName;
+        propSuffix = getPropertySuffix(ifaceName, metricName);
     }
-    propSuffix = getPropertySuffix(ifaceName, metricName);
-  } else if (deviceType == "MemoryMetrics") {
-    metricURI = "/redfish/v1/Systems/" PLATFORMSYSTEMID;
-    metricURI += "/Memory/";
-    metricURI += deviceName;
-    if (ifaceName == "com.nvidia.MemoryRowRemapping") {
-      if (metricName == "RowRemappingFailureState" ||
-          metricName == "RowRemappingPendingState") {
-        metricURI += "#";
-      } else {
-        metricURI += "/MemoryMetrics#";
-      }
-    } else if (ifaceName == "xyz.openbmc_project.Memory.MemoryECC") {
-      metricURI += "/MemoryMetrics#/LifeTime";
-    } else {
-      metricURI += "/MemoryMetrics#";
+    else if (deviceType == "ProcessorPortGPMMetrics")
+    {
+        metricURI = "/redfish/v1/Systems/" PLATFORMSYSTEMID;
+        metricURI += "/Processors/";
+        metricURI += deviceName;
+        metricURI += "/Ports/";
+        metricURI += subDeviceName;
+        metricURI += "/Metrics#";
+        propSuffix = getPropertySuffix(ifaceName, metricName);
     }
-    propSuffix = getPropertySuffix(ifaceName, metricName);
-  } else {
-    metricURI.clear();
-  }
-  if (!propSuffix.empty()) {
-    metricURI += propSuffix;
-  } else {
-    if (deviceType != "PlatformEnvironmentMetrics") {
-      metricURI.clear();
+    else if (deviceType == "NVSwitchPortMetrics")
+    {
+        metricURI = "/redfish/v1/Fabrics/" PLATFORMDEVICEPREFIX;
+        metricURI += "NVLinkFabric_0/Switches/";
+        metricURI += deviceName;
+        metricURI += "/Ports/";
+        metricURI += subDeviceName;
+        propSuffix = getPropertySuffix(ifaceName, metricName);
     }
-  }
-  return metricURI;
+    else if (deviceType == "ProcessorMetrics")
+    {
+        metricURI = "/redfish/v1/Systems/" PLATFORMSYSTEMID;
+        metricURI += "/Processors/";
+        metricURI += deviceName;
+        metricURI += "/ProcessorMetrics#";
+        if (ifaceName == "xyz.openbmc_project.Memory.MemoryECC")
+        {
+            metricURI += "/CacheMetricsTotal/LifeTime";
+        }
+        else if (ifaceName == "xyz.openbmc_project.PCIe.PCIeECC")
+        {
+            if (metricName == "PCIeType" || metricName == "MaxLanes" ||
+                metricName == "LanesInUse")
+            {
+                sdbusplus::message::object_path deviceObjectPath(devicePath);
+                const string childDeviceName = deviceObjectPath.filename();
+                string parentDeviceName = PLATFORMDEVICEPREFIX;
+                parentDeviceName += childDeviceName;
+                metricURI = "/redfish/v1/Chassis/";
+                metricURI += parentDeviceName;
+                metricURI += "/PCIeDevices/";
+                metricURI += childDeviceName;
+            }
+        }
+        else if (ifaceName ==
+                 "xyz.openbmc_project.State.Decorator.OperationalStatus")
+        {
+            metricURI = "/redfish/v1/Systems/" PLATFORMSYSTEMID;
+            metricURI += "/Processors/";
+            metricURI += deviceName;
+        }
+        propSuffix = getPropertySuffix(ifaceName, metricName);
+    }
+    else if (deviceType == "ProcessorGPMMetrics")
+    {
+        metricURI = "/redfish/v1/Systems/" PLATFORMSYSTEMID;
+        metricURI += "/Processors/";
+        metricURI += deviceName;
+        metricURI += "/ProcessorMetrics#";
+        propSuffix = getPropertySuffix(ifaceName, metricName);
+    }
+    else if (deviceType == "NVSwitchMetrics")
+    {
+        metricURI = "/redfish/v1/Fabrics/" PLATFORMDEVICEPREFIX;
+        metricURI += "NVLinkFabric_0/Switches/";
+        metricURI += deviceName;
+        metricURI += "/SwitchMetrics#";
+        if (ifaceName == "xyz.openbmc_project.Memory.MemoryECC")
+        {
+            metricURI += "/InternalMemoryMetrics/LifeTime";
+        }
+        propSuffix = getPropertySuffix(ifaceName, metricName);
+    }
+    else if (deviceType == "MemoryMetrics")
+    {
+        metricURI = "/redfish/v1/Systems/" PLATFORMSYSTEMID;
+        metricURI += "/Memory/";
+        metricURI += deviceName;
+        if (ifaceName == "com.nvidia.MemoryRowRemapping")
+        {
+            if (metricName == "RowRemappingFailureState" ||
+                metricName == "RowRemappingPendingState")
+            {
+                metricURI += "#";
+            }
+            else
+            {
+                metricURI += "/MemoryMetrics#";
+            }
+        }
+        else if (ifaceName == "xyz.openbmc_project.Memory.MemoryECC")
+        {
+            metricURI += "/MemoryMetrics#/LifeTime";
+        }
+        else
+        {
+            metricURI += "/MemoryMetrics#";
+        }
+        propSuffix = getPropertySuffix(ifaceName, metricName);
+    }
+    else
+    {
+        metricURI.clear();
+    }
+    if (!propSuffix.empty())
+    {
+        metricURI += propSuffix;
+    }
+    else
+    {
+        if (deviceType != "PlatformEnvironmentMetrics")
+        {
+            metricURI.clear();
+        }
+    }
+    return metricURI;
 }
 
 /**
@@ -447,23 +513,29 @@ inline string generateURI(const string &deviceType, const string &deviceName,
  * @param[in] reading
  * @return string
  */
-inline string translateThrottleDuration(const string &metricName,
-                                        const uint64_t &reading) {
-  string metricValue;
-  if ((metricName == "PowerLimitThrottleDuration") ||
-      (metricName == "ThermalLimitThrottleDuration") ||
-      (metricName == "HardwareViolationThrottleDuration") ||
-      (metricName == "GlobalSoftwareViolationThrottleDuration")) {
-    optional<string> duration =
-        nv::sensor_aggregation::metricUtils::toDurationStringFromNano(reading);
+inline string translateThrottleDuration(const string& metricName,
+                                        const uint64_t& reading)
+{
+    string metricValue;
+    if ((metricName == "PowerLimitThrottleDuration") ||
+        (metricName == "ThermalLimitThrottleDuration") ||
+        (metricName == "HardwareViolationThrottleDuration") ||
+        (metricName == "GlobalSoftwareViolationThrottleDuration"))
+    {
+        optional<string> duration =
+            nv::sensor_aggregation::metricUtils::toDurationStringFromNano(
+                reading);
 
-    if (duration) {
-      metricValue = *duration;
+        if (duration)
+        {
+            metricValue = *duration;
+        }
     }
-  } else {
-    metricValue = to_string(reading);
-  }
-  return metricValue;
+    else
+    {
+        metricValue = to_string(reading);
+    }
+    return metricValue;
 }
 /**
  * @brief Method to translate D-Bus AccumlatedDuration redfish AccumlatedDuratio
@@ -471,15 +543,17 @@ inline string translateThrottleDuration(const string &metricName,
  * @param reading
  * @return string
  */
-inline string translateAccumlatedDuration(const uint64_t &reading) {
-  std::string metricValue;
-  std::optional<std::string> duration =
-      nv::sensor_aggregation::metricUtils::toDurationStringFromUint(reading);
-  if (duration) {
-    metricValue = *duration;
-  }
+inline string translateAccumlatedDuration(const uint64_t& reading)
+{
+    std::string metricValue;
+    std::optional<std::string> duration =
+        nv::sensor_aggregation::metricUtils::toDurationStringFromUint(reading);
+    if (duration)
+    {
+        metricValue = *duration;
+    }
 
-  return metricValue;
+    return metricValue;
 }
 
 /**
@@ -499,96 +573,125 @@ inline string translateAccumlatedDuration(const uint64_t &reading) {
  * @return pair<unordered_map<SHMKey, SHMValue>, bool>
  */
 inline pair<unordered_map<SHMKey, SHMValue>, bool>
-getMetricValues(const string &deviceType, const string &deviceName,
-                const string &subDeviceName, const string &devicePath,
-                const string &metricName, const string &ifaceName,
-                DbusVariantType &value) {
-  unordered_map<SHMKey, SHMValue> shmValues;
-  bool isList = false;
-  if (const vector<string> *readingArray = get_if<vector<string>>(&value)) {
-    // This is for the property whose value is of type list and each element
-    // in the list on the redfish is represented with
-    // "PropertyName/<index_of_list_element>". and it always starts with 0
-    // Eg:- ThrottleReasosns: [Idle, AppClock]-> "Idle" maps to
-    // ThrottleReasons/0
-    isList = true;
-    int i = 0;
-    for (const string &reading : *readingArray) {
-      string val = translateReading(ifaceName, metricName, reading);
-      string metricProp = generateURI(deviceType, deviceName, subDeviceName,
-                                      devicePath, metricName, ifaceName);
-      metricProp += "/";
-      metricProp += to_string(i);
-      string sensorKey =
-          ifaceName + "." + devicePath + "." + metricName + "/" + to_string(i);
-      SHMValue shmValue = {metricProp, val};
-      shmValues.emplace(sensorKey, shmValue);
-      i++;
+    getMetricValues(const string& deviceType, const string& deviceName,
+                    const string& subDeviceName, const string& devicePath,
+                    const string& metricName, const string& ifaceName,
+                    DbusVariantType& value)
+{
+    unordered_map<SHMKey, SHMValue> shmValues;
+    bool isList = false;
+    if (const vector<string>* readingArray = get_if<vector<string>>(&value))
+    {
+        // This is for the property whose value is of type list and each element
+        // in the list on the redfish is represented with
+        // "PropertyName/<index_of_list_element>". and it always starts with 0
+        // Eg:- ThrottleReasosns: [Idle, AppClock]-> "Idle" maps to
+        // ThrottleReasons/0
+        isList = true;
+        int i = 0;
+        for (const string& reading : *readingArray)
+        {
+            string val = translateReading(ifaceName, metricName, reading);
+            string metricProp = generateURI(deviceType, deviceName,
+                                            subDeviceName, devicePath,
+                                            metricName, ifaceName);
+            metricProp += "/";
+            metricProp += to_string(i);
+            string sensorKey = ifaceName + "." + devicePath + "." + metricName +
+                               "/" + to_string(i);
+            SHMValue shmValue = {metricProp, val};
+            shmValues.emplace(sensorKey, shmValue);
+            i++;
+        }
     }
-  } else if (const vector<double> *readingArray =
-                 get_if<vector<double>>(&value)) {
-    // This is for the property whose value is of type list and each element
-    // in the list on the redfish is represented with
-    // "PropertyName/<index_of_list_element>". and it always starts with 0
-    isList = true;
-    int i = 0;
-    for (const double &reading : *readingArray) {
-      string val = to_string(reading);
-      string metricProp = generateURI(deviceType, deviceName, subDeviceName,
-                                      devicePath, metricName, ifaceName);
-      metricProp += "/";
-      metricProp += to_string(i);
-      string sensorKey =
-          ifaceName + "." + devicePath + "." + metricName + "/" + to_string(i);
-      SHMValue shmValue = {metricProp, val};
-      shmValues.emplace(sensorKey, shmValue);
-      i++;
+    else if (const vector<double>* readingArray =
+                 get_if<vector<double>>(&value))
+    {
+        // This is for the property whose value is of type list and each element
+        // in the list on the redfish is represented with
+        // "PropertyName/<index_of_list_element>". and it always starts with 0
+        isList = true;
+        int i = 0;
+        for (const double& reading : *readingArray)
+        {
+            string val = to_string(reading);
+            string metricProp = generateURI(deviceType, deviceName,
+                                            subDeviceName, devicePath,
+                                            metricName, ifaceName);
+            metricProp += "/";
+            metricProp += to_string(i);
+            string sensorKey = ifaceName + "." + devicePath + "." + metricName +
+                               "/" + to_string(i);
+            SHMValue shmValue = {metricProp, val};
+            shmValues.emplace(sensorKey, shmValue);
+            i++;
+        }
     }
-  } else {
-    const string metricProp = generateURI(deviceType, deviceName, subDeviceName,
-                                          devicePath, metricName, ifaceName);
-    if (metricProp.empty()) {
-      return {shmValues, isList};
+    else
+    {
+        const string metricProp = generateURI(deviceType, deviceName,
+                                              subDeviceName, devicePath,
+                                              metricName, ifaceName);
+        if (metricProp.empty())
+        {
+            return {shmValues, isList};
+        }
+        string val;
+        if (const string* reading = get_if<string>(&value))
+        {
+            val = translateReading(ifaceName, metricName, *reading);
+        }
+        else if (const int* reading = get_if<int>(&value))
+        {
+            val = to_string(*reading);
+        }
+        else if (const int16_t* reading = get_if<int16_t>(&value))
+        {
+            val = to_string(*reading);
+        }
+        else if (const int64_t* reading = get_if<int64_t>(&value))
+        {
+            val = to_string(*reading);
+        }
+        else if (const uint16_t* reading = get_if<uint16_t>(&value))
+        {
+            val = to_string(*reading);
+        }
+        else if (const uint32_t* reading = get_if<uint32_t>(&value))
+        {
+            val = to_string(*reading);
+        }
+        else if (const uint64_t* reading = get_if<uint64_t>(&value))
+        {
+            if ((ifaceName ==
+                 "xyz.openbmc_project.State.ProcessorPerformance") &&
+                ((metricName == "AccumulatedSMUtilizationDuration") ||
+                 (metricName == "AccumulatedGPUContextUtilizationDuration")))
+            {
+                val = translateAccumlatedDuration(*reading);
+            }
+            else
+            {
+                val = translateThrottleDuration(metricName, *reading);
+            }
+        }
+        else if (const double* reading = get_if<double>(&value))
+        {
+            val = to_string(*reading);
+        }
+        else if (const bool* reading = get_if<bool>(&value))
+        {
+            val = "false";
+            if (*reading == true)
+            {
+                val = "true";
+            }
+        }
+        string sensorKey = ifaceName + "." + devicePath + "." + metricName;
+        SHMValue shmValue = {metricProp, val};
+        shmValues.emplace(sensorKey, shmValue);
     }
-    string val;
-    if (const string *reading = get_if<string>(&value)) {
-      val = translateReading(ifaceName, metricName, *reading);
-    } else if (const int *reading = get_if<int>(&value)) {
-
-      val = to_string(*reading);
-    } else if (const int16_t *reading = get_if<int16_t>(&value)) {
-
-      val = to_string(*reading);
-    } else if (const int64_t *reading = get_if<int64_t>(&value)) {
-
-      val = to_string(*reading);
-    } else if (const uint16_t *reading = get_if<uint16_t>(&value)) {
-
-      val = to_string(*reading);
-    } else if (const uint32_t *reading = get_if<uint32_t>(&value)) {
-      val = to_string(*reading);
-    } else if (const uint64_t *reading = get_if<uint64_t>(&value)) {
-      if ((ifaceName == "xyz.openbmc_project.State.ProcessorPerformance") &&
-          ((metricName == "AccumulatedSMUtilizationDuration") ||
-           (metricName == "AccumulatedGPUContextUtilizationDuration"))) {
-        val = translateAccumlatedDuration(*reading);
-      } else {
-        val = translateThrottleDuration(metricName, *reading);
-      }
-    } else if (const double *reading = get_if<double>(&value)) {
-
-      val = to_string(*reading);
-    } else if (const bool *reading = get_if<bool>(&value)) {
-      val = "false";
-      if (*reading == true) {
-        val = "true";
-      }
-    }
-    string sensorKey = ifaceName + "." + devicePath + "." + metricName;
-    SHMValue shmValue = {metricProp, val};
-    shmValues.emplace(sensorKey, shmValue);
-  }
-  return {shmValues, isList};
+    return {shmValues, isList};
 }
 
 /**
@@ -602,45 +705,61 @@ getMetricValues(const string &deviceType, const string &deviceName,
  * @param[in] value
  * @return SHMValue
  */
-inline SHMValue getMetricValue(const string &metricName,
-                               const string &ifaceName,
-                               DbusVariantType &value) {
-  string val;
-  if (const string *reading = get_if<string>(&value)) {
-    val = translateReading(ifaceName, metricName, *reading);
-  } else if (const int *reading = get_if<int>(&value)) {
-
-    val = to_string(*reading);
-  } else if (const int16_t *reading = get_if<int16_t>(&value)) {
-
-    val = to_string(*reading);
-  } else if (const int64_t *reading = get_if<int64_t>(&value)) {
-
-    val = to_string(*reading);
-  } else if (const uint16_t *reading = get_if<uint16_t>(&value)) {
-
-    val = to_string(*reading);
-  } else if (const uint32_t *reading = get_if<uint32_t>(&value)) {
-    val = to_string(*reading);
-  } else if (const uint64_t *reading = get_if<uint64_t>(&value)) {
-    if ((ifaceName == "xyz.openbmc_project.State.ProcessorPerformance") &&
-        ((metricName == "AccumulatedSMUtilizationDuration") ||
-         (metricName == "AccumulatedGPUContextUtilizationDuration"))) {
-      val = translateAccumlatedDuration(*reading);
-    } else {
-      val = translateThrottleDuration(metricName, *reading);
+inline SHMValue getMetricValue(const string& metricName,
+                               const string& ifaceName, DbusVariantType& value)
+{
+    string val;
+    if (const string* reading = get_if<string>(&value))
+    {
+        val = translateReading(ifaceName, metricName, *reading);
     }
-  } else if (const double *reading = get_if<double>(&value)) {
-
-    val = to_string(*reading);
-  } else if (const bool *reading = get_if<bool>(&value)) {
-    val = "false";
-    if (*reading == true) {
-      val = "true";
+    else if (const int* reading = get_if<int>(&value))
+    {
+        val = to_string(*reading);
     }
-  }
-  SHMValue shmValue = {"", val};
-  return shmValue;
+    else if (const int16_t* reading = get_if<int16_t>(&value))
+    {
+        val = to_string(*reading);
+    }
+    else if (const int64_t* reading = get_if<int64_t>(&value))
+    {
+        val = to_string(*reading);
+    }
+    else if (const uint16_t* reading = get_if<uint16_t>(&value))
+    {
+        val = to_string(*reading);
+    }
+    else if (const uint32_t* reading = get_if<uint32_t>(&value))
+    {
+        val = to_string(*reading);
+    }
+    else if (const uint64_t* reading = get_if<uint64_t>(&value))
+    {
+        if ((ifaceName == "xyz.openbmc_project.State.ProcessorPerformance") &&
+            ((metricName == "AccumulatedSMUtilizationDuration") ||
+             (metricName == "AccumulatedGPUContextUtilizationDuration")))
+        {
+            val = translateAccumlatedDuration(*reading);
+        }
+        else
+        {
+            val = translateThrottleDuration(metricName, *reading);
+        }
+    }
+    else if (const double* reading = get_if<double>(&value))
+    {
+        val = to_string(*reading);
+    }
+    else if (const bool* reading = get_if<bool>(&value))
+    {
+        val = "false";
+        if (*reading == true)
+        {
+            val = "true";
+        }
+    }
+    SHMValue shmValue = {"", val};
+    return shmValue;
 }
 
 } // namespace metricUtils

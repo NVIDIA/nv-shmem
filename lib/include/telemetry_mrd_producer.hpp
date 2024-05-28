@@ -1,6 +1,6 @@
 /*
- * SPDX-FileCopyrightText: Copyright (c) 2023-2024 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
- * SPDX-License-Identifier: Apache-2.0
+ * SPDX-FileCopyrightText: Copyright (c) 2023-2024 NVIDIA CORPORATION &
+ * AFFILIATES. All rights reserved. SPDX-License-Identifier: Apache-2.0
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -100,8 +100,10 @@ Example: Update nan
 #pragma once
 #include <shm_common.h>
 
-namespace nv {
-namespace sensor_aggregation {
+namespace nv
+{
+namespace sensor_aggregation
+{
 class SHMSensorAggregator;
 }
 } // namespace nv
@@ -109,48 +111,51 @@ class SHMSensorAggregator;
 // using namespace std;
 using namespace nv::sensor_aggregation;
 
-namespace nv {
+namespace nv
+{
 
-namespace shmem {
+namespace shmem
+{
 
-struct AggregationService {
-private:
-  static std::shared_ptr<SHMSensorAggregator> sensorAggregator;
+struct AggregationService
+{
+  private:
+    static std::shared_ptr<SHMSensorAggregator> sensorAggregator;
 
-public:
-  /**
-   * @brief API to initialize the namespace. This API takes the process name as
-   * input which will be the suffix for shared memory namespaces. This API
-   * should be called once in telemetry producers, before creating new telemetry
-   * objects.
-   *
-   * @param[in] processName - process name of producer service
-   * @return true
-   * @return false
-   */
-  static bool namespaceInit(std::string processName);
+  public:
+    /**
+     * @brief API to initialize the namespace. This API takes the process name
+     * as input which will be the suffix for shared memory namespaces. This API
+     * should be called once in telemetry producers, before creating new
+     * telemetry objects.
+     *
+     * @param[in] processName - process name of producer service
+     * @return true
+     * @return false
+     */
+    static bool namespaceInit(std::string processName);
 
-  /**
-   * @brief API to add new telemetry object, update existing telemetry object
-   * value and update nan. This API should be called by telemetry producers.
-   *
-   * @param[in] devicePath - Device path of telemetry object.
-   * @param[in] interface - Phosphor D-Bus interface of telemetry object.
-   * @param[in] propName - Metric name.
-   * @param[in] value - Metric value.
-   * @param[in] timestamp - Timestamp of telemetry object.
-   * @param[in] rc - Set this value to non zero for nan update.
-   * @param[in] associatedEntityPath - optional for other metrics. Required for
-   * platform environment metrics.
-   * @return true
-   * @return false
-   */
-  static bool updateTelemetry(const std::string &devicePath,
-                              const std::string &interface,
-                              const std::string &propName,
-                              DbusVariantType &value, const uint64_t timestamp,
-                              int rc,
-                              const std::string associatedEntityPath = {});
+    /**
+     * @brief API to add new telemetry object, update existing telemetry object
+     * value and update nan. This API should be called by telemetry producers.
+     *
+     * @param[in] devicePath - Device path of telemetry object.
+     * @param[in] interface - Phosphor D-Bus interface of telemetry object.
+     * @param[in] propName - Metric name.
+     * @param[in] value - Metric value.
+     * @param[in] timestamp - Timestamp of telemetry object.
+     * @param[in] rc - Set this value to non zero for nan update.
+     * @param[in] associatedEntityPath - optional for other metrics. Required
+     * for platform environment metrics.
+     * @return true
+     * @return false
+     */
+    static bool updateTelemetry(const std::string& devicePath,
+                                const std::string& interface,
+                                const std::string& propName,
+                                DbusVariantType& value,
+                                const uint64_t timestamp, int rc,
+                                const std::string associatedEntityPath = {});
 };
 } // namespace shmem
 } // namespace nv

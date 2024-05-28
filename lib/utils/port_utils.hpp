@@ -1,6 +1,6 @@
 /*
- * SPDX-FileCopyrightText: Copyright (c) 2023-2024 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
- * SPDX-License-Identifier: Apache-2.0
+ * SPDX-FileCopyrightText: Copyright (c) 2023-2024 NVIDIA CORPORATION &
+ * AFFILIATES. All rights reserved. SPDX-License-Identifier: Apache-2.0
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,9 +21,12 @@
 
 using namespace std;
 
-namespace nv {
-namespace sensor_aggregation {
-namespace metricUtils {
+namespace nv
+{
+namespace sensor_aggregation
+{
+namespace metricUtils
+{
 
 /* Map for link status pdi to redfish string */
 static unordered_map<string, string> linkStatusTypeMap = {
@@ -42,11 +45,13 @@ static unordered_map<string, string> linkStatusTypeMap = {
  * @param[in] linkStatusType
  * @return string
  */
-inline string getLinkStatusType(const string &linkStatusType) {
-  if (linkStatusTypeMap.find(linkStatusType) != linkStatusTypeMap.end()) {
-    return linkStatusTypeMap[linkStatusType];
-  }
-  return "";
+inline string getLinkStatusType(const string& linkStatusType)
+{
+    if (linkStatusTypeMap.find(linkStatusType) != linkStatusTypeMap.end())
+    {
+        return linkStatusTypeMap[linkStatusType];
+    }
+    return "";
 }
 
 } // namespace metricUtils

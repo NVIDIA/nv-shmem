@@ -1,6 +1,6 @@
 /*
- * SPDX-FileCopyrightText: Copyright (c) 2023-2024 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
- * SPDX-License-Identifier: Apache-2.0
+ * SPDX-FileCopyrightText: Copyright (c) 2023-2024 NVIDIA CORPORATION &
+ * AFFILIATES. All rights reserved. SPDX-License-Identifier: Apache-2.0
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -39,11 +39,15 @@ nv::shmem::sensor_aggregation::getAllMRDValues(metricId);
 */
 #pragma once
 #include <shm_common.h>
+
 #include <vector>
 
-namespace nv {
-namespace shmem {
-namespace sensor_aggregation {
+namespace nv
+{
+namespace shmem
+{
+namespace sensor_aggregation
+{
 
 /**
  * @brief This API returns all metric report definitions for a given namespace.
@@ -54,7 +58,7 @@ namespace sensor_aggregation {
  * @return values - metric report definitions values. Incase of no elements or
  * absence of given shared memory namespace exception is thrown.
  */
-std::vector<SensorValue> getAllMRDValues(const std::string &mrdNamespace);
+std::vector<SensorValue> getAllMRDValues(const std::string& mrdNamespace);
 
 std::vector<std::string> getMrdNamespacesValues();
 
@@ -63,9 +67,11 @@ std::vector<std::string> getMrdNamespacesValues();
  * memory.
  *
  */
-struct NameSpaceNotFoundException : public std::runtime_error {
-  NameSpaceNotFoundException()
-      : std::runtime_error("Namespace is not found in shared memory") {}
+struct NameSpaceNotFoundException : public std::runtime_error
+{
+    NameSpaceNotFoundException() :
+        std::runtime_error("Namespace is not found in shared memory")
+    {}
 };
 
 /**
@@ -73,9 +79,11 @@ struct NameSpaceNotFoundException : public std::runtime_error {
  * memory for a given namespace
  *
  */
-struct NoElementsException : public std::runtime_error {
-  NoElementsException()
-      : std::runtime_error("Namespace has no elements in shared memory") {}
+struct NoElementsException : public std::runtime_error
+{
+    NoElementsException() :
+        std::runtime_error("Namespace has no elements in shared memory")
+    {}
 };
 
 } // namespace sensor_aggregation
