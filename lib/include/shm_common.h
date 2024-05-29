@@ -1,6 +1,6 @@
 /*
- * SPDX-FileCopyrightText: Copyright (c) 2023-2024 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
- * SPDX-License-Identifier: Apache-2.0
+ * SPDX-FileCopyrightText: Copyright (c) 2023-2024 NVIDIA CORPORATION &
+ * AFFILIATES. All rights reserved. SPDX-License-Identifier: Apache-2.0
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,16 +19,19 @@
 #include <boost/interprocess/containers/string.hpp>
 #include <boost/interprocess/managed_shared_memory.hpp>
 #include <sdbusplus/bus.hpp>
+
 #include <vector>
 
-#ifdef ENABLE_SHM_DEBUG 
+#ifdef ENABLE_SHM_DEBUG
 #define SHMDEBUG(msg, ...) lg2::info(msg, __VA_ARGS__)
 #else
 #define SHMDEBUG(msg, ...)
 #endif
 
-namespace nv {
-namespace sensor_aggregation {
+namespace nv
+{
+namespace sensor_aggregation
+{
 // using namespace std;
 using DbusVariantType = std::variant<
     std::vector<std::tuple<std::string, std::string, std::string>>,
@@ -50,8 +53,10 @@ using DbusVariantType = std::variant<
 } // namespace sensor_aggregation
 } // namespace nv
 
-namespace nv {
-namespace shmem {
+namespace nv
+{
+namespace shmem
+{
 using segment_manager_t =
     boost::interprocess::managed_shared_memory::segment_manager;
 using void_allocator_t =
@@ -64,37 +69,43 @@ using char_allocator_t =
 using char_string_t =
     boost::container::basic_string<char, std::char_traits<char>,
                                    char_allocator_t>;
-struct SensorMapValue {
-  char_string_t sensorValue;
-  char_string_t timestampStr;
-  char_string_t metricProperty;
-  uint64_t timestamp;
+struct SensorMapValue
+{
+    char_string_t sensorValue;
+    char_string_t timestampStr;
+    char_string_t metricProperty;
+    uint64_t timestamp;
 
-  SensorMapValue(const void_allocator_t &void_alloc)
-      : sensorValue(void_alloc), timestampStr(void_alloc),
-        metricProperty(void_alloc), timestamp(0U) {}
+    SensorMapValue(const void_allocator_t& void_alloc) :
+        sensorValue(void_alloc), timestampStr(void_alloc),
+        metricProperty(void_alloc), timestamp(0U)
+    {}
 };
 
-struct SensorValue {
-  std::string sensorValue;
-  std::string metricProperty;
-  uint64_t timestamp;
-  std::string timestampStr;
+struct SensorValue
+{
+    std::string sensorValue;
+    std::string metricProperty;
+    uint64_t timestamp;
+    std::string timestampStr;
 
-  SensorValue() = default;
+    SensorValue() = default;
 
-  SensorValue(const std::string &sensorValue, const std::string &metricProperty,
-              const uint64_t timestamp, const std::string &timestampStr)
-      : sensorValue(sensorValue), metricProperty(metricProperty),
-        timestamp(timestamp), timestampStr(timestampStr) {}
+    SensorValue(const std::string& sensorValue,
+                const std::string& metricProperty, const uint64_t timestamp,
+                const std::string& timestampStr) :
+        sensorValue(sensorValue), metricProperty(metricProperty),
+        timestamp(timestamp), timestampStr(timestampStr)
+    {}
 
-  SensorValue &operator=(const SensorMapValue &mapValue) {
-    metricProperty = mapValue.metricProperty;
-    timestampStr = mapValue.timestampStr;
-    sensorValue = mapValue.sensorValue;
-    timestamp = mapValue.timestamp;
-    return *this;
-  }
+    SensorValue& operator=(const SensorMapValue& mapValue)
+    {
+        metricProperty = mapValue.metricProperty;
+        timestampStr = mapValue.timestampStr;
+        sensorValue = mapValue.sensorValue;
+        timestamp = mapValue.timestamp;
+        return *this;
+    }
 };
 
 } // namespace shmem
