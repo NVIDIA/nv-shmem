@@ -30,13 +30,15 @@ namespace metricUtils
 
 /* Map for link status pdi to redfish string */
 static unordered_map<string, string> linkStatusTypeMap = {
-    {"xyz.openbmc_project.Inventory.Item.Port.LinkStatusType.LinkDown",
+    {"xyz.openbmc_project.Inventory.Decorator.PortState.LinkStatusType.LinkDown",
      "LinkDown"},
-    {"xyz.openbmc_project.Inventory.Item.Port.LinkStatusType.LinkUp", "LinkUp"},
-    {"xyz.openbmc_project.Inventory.Item.Port.LinkStatusType.NoLink", "NoLink"},
-    {"xyz.openbmc_project.Inventory.Item.Port.LinkStatusType.Starting",
+    {"xyz.openbmc_project.Inventory.Decorator.PortState.LinkStatusType.LinkUp",
+     "LinkUp"},
+    {"xyz.openbmc_project.Inventory.Decorator.PortState.LinkStatusType.NoLink",
+     "NoLink"},
+    {"xyz.openbmc_project.Inventory.Decorator.PortState.LinkStatusType.Starting",
      "Starting"},
-    {"xyz.openbmc_project.Inventory.Item.Port.LinkStatusType.Training",
+    {"xyz.openbmc_project.Inventory.Decorator.PortState.LinkStatusType.Training",
      "Training"}};
 
 /**
