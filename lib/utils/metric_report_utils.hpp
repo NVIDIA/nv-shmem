@@ -105,21 +105,33 @@ static unordered_map<string, string> powerStateTypeMap = {
      "Updating"},
 };
 
-/* Map for port interface pdi to redfish string based on metric name */
-static MetricNameMap portInterfaceMap = {
-    {"RXNoProtocolBytes", "/Metrics#/Oem/Nvidia/RXNoProtocolBytes"},
-    {"TXNoProtocolBytes", "/Metrics#/Oem/Nvidia/TXNoProtocolBytes"},
+/* Map for portInfo interface pdi to redfish string based on metric name */
+static MetricNameMap portInfoInterfaceMap = {
+    {"CurrentSpeed", "#/CurrentSpeedGbps"},
+    {"MaxSpeed", "#/MaxSpeedGbps"}};
+
+/* Map for portState interface pdi to redfish string based on metric name */
+static MetricNameMap portStateInterfaceMap = {
+    {"LinkStatus", "#/LinkStatus"}};
+
+/* Map for portMetricsOem1 interface pdi to redfish string based on metric name */
+static MetricNameMap portMetricsOem1InterfaceMap = {
     {"DataCRCCount", "/Metrics#/Oem/Nvidia/NVLinkErrors/DataCRCCount"},
     {"FlitCRCCount", "/Metrics#/Oem/Nvidia/NVLinkErrors/FlitCRCCount"},
     {"RecoveryCount", "/Metrics#/Oem/Nvidia/NVLinkErrors/RecoveryCount"},
-    {"ReplayErrorsCount", "/Metrics#/Oem/Nvidia/NVLinkErrors/ReplayCount"},
+    {"ReplayErrorsCount", "/Metrics#/Oem/Nvidia/NVLinkErrors/ReplayCount"}};
+
+/* Map for portMetricsOem2 interface pdi to redfish string based on metric name */
+static MetricNameMap portMetricsOem2InterfaceMap = {
+    {"RXBytes", "/Metrics#/RXBytes"},
+    {"TXBytes", "/Metrics#/TXBytes"}};
+
+/* Map for portMetricsOem3 interface pdi to redfish string based on metric name */
+static MetricNameMap portMetricsOem3InterfaceMap = {
+    {"RXNoProtocolBytes", "/Metrics#/Oem/Nvidia/RXNoProtocolBytes"},
+    {"TXNoProtocolBytes", "/Metrics#/Oem/Nvidia/TXNoProtocolBytes"},
     {"RuntimeError", "/Metrics#/Oem/Nvidia/NVLinkErrors/RuntimeError"},
     {"TrainingError", "/Metrics#/Oem/Nvidia/NVLinkErrors/TrainingError"},
-    {"RXBytes", "/Metrics#/RXBytes"},
-    {"TXBytes", "/Metrics#/TXBytes"},
-    {"CurrentSpeed", "#/CurrentSpeedGbps"},
-    {"MaxSpeed", "#/MaxSpeedGbps"},
-    {"LinkStatus", "#/LinkStatus"},
     {"TXWidth", "#/Oem/Nvidia/TXWidth"},
     {"RXWidth", "#/Oem/Nvidia/RXWidth"}};
 
@@ -220,7 +232,11 @@ static MetricNameMap operationalStatusMap = {{"State", "/Status/State"}};
 /* This map is for PDI name to metric name. Key is pdi name and value is
  * corresponding metric name map */
 static PDINameMap pdiNameMap = {
-    {"xyz.openbmc_project.Inventory.Item.Port", portInterfaceMap},
+    {"xyz.openbmc_project.Inventory.Decorator.PortInfo", portInfoInterfaceMap},
+    {"xyz.openbmc_project.Inventory.Decorator.PortState", portStateInterfaceMap},
+    {"xyz.openbmc_project.Metrics.PortMetricsOem1", portMetricsOem1InterfaceMap},
+    {"xyz.openbmc_project.Metrics.PortMetricsOem2", portMetricsOem2InterfaceMap},
+    {"xyz.openbmc_project.Metrics.PortMetricsOem3", portMetricsOem3InterfaceMap},
     {"xyz.openbmc_project.State.ProcessorPerformance", processorPerfMap},
     {"com.nvidia.NVLink.NVLinkMetrics", nvLinkMetricsMap},
     {"com.nvidia.GPMMetrics", gpmMetricsMap},
@@ -331,7 +347,7 @@ inline string translateReading(const string& ifaceName,
             metricValue = toPCIeType(reading);
         }
     }
-    else if (ifaceName == "xyz.openbmc_project.Inventory.Item.Port")
+    else if (ifaceName == "xyz.openbmc_project.Inventory.Decorator.PortState")
     {
         if (metricName == "LinkStatus")
         {
