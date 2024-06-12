@@ -66,6 +66,17 @@ bool AggregationService::namespaceInit(string processName)
             "EXCEPTION", e.what());
         return false;
     }
+    if (sensorAggregator == nullptr)
+    {
+        return false;
+    }
+    if (!sensorAggregator->createShmemNamespace())
+    {  
+        lg2::error(
+            "SHMEMDEBUG: Exception while creating namespace.");
+        return false;
+    }
+
     return true;
 }
 
