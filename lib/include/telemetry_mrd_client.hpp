@@ -41,6 +41,7 @@ nv::shmem::sensor_aggregation::getAllMRDValues(metricId);
 #include <shm_common.h>
 
 #include <vector>
+#include <unordered_map>
 
 namespace nv
 {
@@ -62,6 +63,16 @@ std::vector<SensorValue> getAllMRDValues(const std::string& mrdNamespace);
 
 std::vector<std::string> getMrdNamespacesValues();
 
+/**
+ * @brief This API returns all key value pairs of a given namespace.
+ * This API should be used clients interested in raw data access using shmem Key . Exceptions will be
+ * thrown in case of no elements or absence of given shared memory namespace.
+ *
+ * @param[in] mrdNamespace - shmem namespace
+ * @return ShmemKeyValuePairs - vector of key-value pairs Incase of no elements or
+ * absence of given shared memory namespace exception is thrown.
+ */
+ShmemKeyValuePairs getAllKeyValuePair(const std::string& mrdNamespace);
 /**
  * @brief This exception should be thrown when name space is not found in shared
  * memory.

@@ -72,6 +72,12 @@ class Map : public ManagedShmem
      */
     vector<ValueType> getAllValues();
 
+
+    /** @brief Get all the objects present in the map as key value pair 
+     *  @return vector of key-value pairs 
+     */
+    ShmemKeyValuePairs getAllKeyValuePair();
+
     /** @brief Get value of single object
      *  @param[in] key - key of the which which must be retrieved
      *  @param[in] val - object reference where the found object will be

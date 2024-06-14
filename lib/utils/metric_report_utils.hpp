@@ -613,7 +613,7 @@ inline pair<unordered_map<SHMKey, SHMValue>, bool>
                                             metricName, ifaceName);
             metricProp += "/";
             metricProp += to_string(i);
-            string sensorKey = ifaceName + "." + devicePath + "." + metricName +
+            string sensorKey = devicePath + "/" + ifaceName + "." + metricName +
                                "/" + to_string(i);
             SHMValue shmValue = {metricProp, val};
             shmValues.emplace(sensorKey, shmValue);
@@ -636,7 +636,7 @@ inline pair<unordered_map<SHMKey, SHMValue>, bool>
                                             metricName, ifaceName);
             metricProp += "/";
             metricProp += to_string(i);
-            string sensorKey = ifaceName + "." + devicePath + "." + metricName +
+            string sensorKey = devicePath + "/" + ifaceName + "." + metricName + 
                                "/" + to_string(i);
             SHMValue shmValue = {metricProp, val};
             shmValues.emplace(sensorKey, shmValue);
@@ -650,6 +650,11 @@ inline pair<unordered_map<SHMKey, SHMValue>, bool>
                                               metricName, ifaceName);
         if (metricProp.empty())
         {
+            lg2::error(
+                "SHMEMDEBUG: Metric Property Empty for deviceType {DEVICETYPE} deviceName {DEVICENAME} subDeviceName {SUBDEVICENAME} devicePath {DEVICEPATH} metricName {METRICNAME} ifaceName {IFNAME}",
+                "DEVICETYPE", deviceType, "DEVICENAME", deviceName,
+                "SUBDEVICENAME", subDeviceName, "DEVICEPATH", devicePath,
+                "METRICNAME", metricName, "IFNAME", ifaceName);
             return {shmValues, isList};
         }
         string val;
@@ -703,7 +708,7 @@ inline pair<unordered_map<SHMKey, SHMValue>, bool>
                 val = "true";
             }
         }
-        string sensorKey = ifaceName + "." + devicePath + "." + metricName;
+        string sensorKey = devicePath + "/" + ifaceName + "." + metricName;
         SHMValue shmValue = {metricProp, val};
         shmValues.emplace(sensorKey, shmValue);
     }
