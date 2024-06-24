@@ -106,7 +106,7 @@
                 "GraphicsEngineActivityPercent",
                 "HMMAUtilizationPercent",
                 "IMMAUtilizationPercent",
-                "IntergerActivityUtilizationPercent",
+                "IntegerActivityUtilizationPercent",
                 "NVDecInstanceUtilizationPercent",
                 "NVDecUtilizationPercent",
                 "NVJpgInstanceUtilizationPercent",
