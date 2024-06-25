@@ -114,6 +114,29 @@ static MetricNameMap portInfoInterfaceMap = {
 static MetricNameMap portStateInterfaceMap = {
     {"LinkStatus", "#/LinkStatus"}};
 
+/* Map for IBPort interface pdi to redfish string based on metric name */
+static MetricNameMap ibPortInterfaceMap = {
+    {"RXErrors", "/Metrics#/RXErrors"},
+    {"TXPkts", "/Metrics#/Networking/TXFrames"},
+    {"RXPkts", "/Metrics#/Networking/RXFrames"},
+    {"RXMulticastPkts", "/Metrics#/Networking/RXMulticastFrames"},
+    {"TXMulticastPkts", "/Metrics#/Networking/TXMulticastFrames"},
+    {"RXUnicastPkts", "/Metrics#/Networking/RXUnicastFrames"},
+    {"TXUnicastPkts", "/Metrics#/Networking/TXUnicastFrames"},
+    {"TXDiscardPkts", "/Metrics#/Networking/TXDiscards"},
+    {"MalformedPkts", "/Metrics#/Oem/Nvidia/MalformedPackets"},
+    {"VL15DroppedPkts", "/Metrics#/Oem/Nvidia/VL15Dropped"},
+    {"VL15TXPkts", "/Metrics#/Oem/Nvidia/VL15TXPackets"},
+    {"VL15TXData", "/Metrics#/Oem/Nvidia/VL15TXBytes"},
+    {"MTUDiscard", "/Metrics#/Oem/Nvidia/NeighborMTUDiscards"},
+    {"SymbolError", "/Metrics#/Oem/Nvidia/SymbolErrors"},
+    {"LinkErrorRecoveryCounter", "/Metrics#/Oem/Nvidia/LinkErrorRecoveryCount"},
+    {"LinkDownCount", "/Metrics#/Oem/Nvidia/LinkDownedCount"},
+    {"RXRemotePhysicalErrorPkts", "/Metrics#/Oem/Nvidia/RXRemotePhysicalErrors"},
+    {"RXSwitchRelayErrorPkts", "/Metrics#/Oem/Nvidia/RXSwitchRelayErrors"},
+    {"QP1DroppedPkts", "/Metrics#/Oem/Nvidia/QP1Dropped"},
+    {"TXWait", "/Metrics#/Oem/Nvidia/TXWait"}};
+
 /* Map for portMetricsOem1 interface pdi to redfish string based on metric name */
 static MetricNameMap portMetricsOem1InterfaceMap = {
     {"DataCRCCount", "/Metrics#/Oem/Nvidia/NVLinkErrors/DataCRCCount"},
@@ -229,11 +252,15 @@ static MetricNameMap memoryRowRemappingMap = {
 /* Map for OperationalStatus pdi to redfish string based on metric name*/
 static MetricNameMap operationalStatusMap = {{"State", "/Status/State"}};
 
+/* Map for Switch pdi to redfish string based on metric name*/
+static MetricNameMap switchInterfaceMap = {{"CurrentBandwidth", "#/CurrentBandwidthGbps"}};
+
 /* This map is for PDI name to metric name. Key is pdi name and value is
  * corresponding metric name map */
 static PDINameMap pdiNameMap = {
     {"xyz.openbmc_project.Inventory.Decorator.PortInfo", portInfoInterfaceMap},
     {"xyz.openbmc_project.Inventory.Decorator.PortState", portStateInterfaceMap},
+    {"xyz.openbmc_project.Metrics.IBPort", ibPortInterfaceMap},
     {"xyz.openbmc_project.Metrics.PortMetricsOem1", portMetricsOem1InterfaceMap},
     {"xyz.openbmc_project.Metrics.PortMetricsOem2", portMetricsOem2InterfaceMap},
     {"xyz.openbmc_project.Metrics.PortMetricsOem3", portMetricsOem3InterfaceMap},
@@ -246,6 +273,8 @@ static PDINameMap pdiNameMap = {
      operatingConfigMap},
     {"xyz.openbmc_project.Inventory.Item.Dimm", dimmMap},
     {"xyz.openbmc_project.Inventory.Item.PCIeDevice", pcieDeviceMap},
+    {"xyz.openbmc_project.Inventory.Item.Switch",
+     switchInterfaceMap},
     {"com.nvidia.MemoryRowRemapping", memoryRowRemappingMap},
     {"xyz.openbmc_project.State.Decorator.OperationalStatus",
      operationalStatusMap}};
