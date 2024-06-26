@@ -120,6 +120,50 @@ MatchingNameSpaces SHMSensorAggregator::parseDevicePath(
     return matchingNameSpaces;
 }
 
+bool SHMSensorAggregator::createShmemNamespace()
+{
+    bool status = true;
+    const auto& producers = ConfigReader::getProducers();
+    for (const auto& producerEntry : producers)
+    {
+        auto it = std::find(producerEntry.second.begin(), producerEntry.second.end(), producerName);
+        if (it != producerEntry.second.end())
+        {
+            auto shmNamespace = producerName + "_" +
+                                PLATFORMDEVICEPREFIX +
+                                producerEntry.first + "_0";
+            if (!sensorMapIntf.isNameSpacePresent(shmNamespace))
+            {
+                try
+                {
+                    const size_t shmSize = ConfigReader::getSHMSize(
+                        producerEntry.first, producerName);
+                    if (!sensorMapIntf.createNamespace(shmNamespace,
+                                                        shmSize))
+                    {
+                        status = false;
+                        return status;
+                    }
+                    lg2::info(
+                        "SHMEMDEBUG: Shared memory created for {SHMNAMESPACE} with "
+                        "size {SHMSIZE}",
+                        "SHMNAMESPACE", shmNamespace, "SHMSIZE",
+                        shmSize);
+                }
+                catch (const exception& e)
+                {
+                    lg2::error(
+                        "SHMEMDEBUG: Exception while getting shared memory size {EXCEPTION}",
+                        "EXCEPTION", e.what());
+                    status = false;
+                    return status;
+                }
+            }
+        }
+    }
+    return status;
+}
+
 bool SHMSensorAggregator::insertShmemObject(
     const NameSpaceFields& nameSpaceFields, const string& sensorKey,
     const string& devicePath, const string& propName, const string& ifaceName,
@@ -141,31 +185,6 @@ bool SHMSensorAggregator::insertShmemObject(
         nv::sensor_aggregation::metricUtils::getDateTimeUintMs(systemTimestamp);
     auto shmNamespace = producerName + "_" + PLATFORMDEVICEPREFIX +
                         nameSpaceFields.sensorNameSpace + "_0";
-    if (!sensorMapIntf.isNameSpacePresent(shmNamespace))
-    {
-        try
-        {
-            const size_t shmSize = ConfigReader::getSHMSize(
-                nameSpaceFields.sensorNameSpace, producerName);
-            if (!sensorMapIntf.createNamespace(shmNamespace, shmSize))
-            {
-                status = false;
-                return status;
-            }
-            lg2::info(
-                "SHMEMDEBUG: Shared memory created for {SHMNAMESPACE} with "
-                "size {SHMSIZE}",
-                "SHMNAMESPACE", shmNamespace, "SHMSIZE", shmSize);
-        }
-        catch (const exception& e)
-        {
-            lg2::error(
-                "SHMEMDEBUG: Exception while getting shared memory size {EXCEPTION}",
-                "EXCEPTION", e.what());
-            status = false;
-            return status;
-        }
-    }
     {
         scoped_lock lock(nameSpaceMapLock);
         nameSpaceMap.emplace(sensorKey, nameSpaceFields);

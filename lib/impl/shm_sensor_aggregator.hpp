@@ -115,6 +115,13 @@ class SHMSensorAggregator
     bool updateNanValue(const string& devicePath, const string& interface,
                         const string& propName, const uint64_t timestamp);
 
+    /**
+     * @brief Method to create sensor namespace in shared memory.
+     *
+     * @return bool
+     */
+    bool createShmemNamespace();
+
   private:
     string producerName;
     mutex nameSpaceMapLock;
