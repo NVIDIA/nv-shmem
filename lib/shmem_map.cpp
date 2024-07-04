@@ -52,6 +52,21 @@ Map<SensorMap, SensorValue>::Map(const string& nameSpace, const int opts) :
 }
 
 template <>
+ShmemKeyValuePairs Map<SensorMap, SensorValue>::getAllKeyValuePair()
+{
+    ShmemKeyValuePairs values;
+    SensorValue value;
+    TryReadLock();
+    auto itr = mapImpl->begin();
+    for (; itr != mapImpl->end(); itr++)
+    {
+        value = (*itr).second;
+        values[(*itr).first] = value.sensorValue;
+    }
+    return values;
+}
+
+template <>
 vector<SensorValue> Map<SensorMap, SensorValue>::getAllValues()
 {
     vector<SensorValue> values;

@@ -37,6 +37,28 @@ namespace shmem
 namespace sensor_aggregation
 {
 
+ShmemKeyValuePairs getAllKeyValuePair(const std::string& mrdNamespace)
+{
+    static unordered_map<string, unique_ptr<sensor_map_type>> sensor_map;
+    try
+    {
+        if (sensor_map.find(mrdNamespace) == sensor_map.end())
+        {
+            sensor_map.insert(std::make_pair(
+                mrdNamespace, make_unique<sensor_map_type>(mrdNamespace, O_RDONLY)));
+        }
+        return sensor_map[mrdNamespace]->getAllKeyValuePair();
+    }
+    catch (const exception& e)
+    {
+        lg2::error("SHMEMDEBUG: Exception {EXCEPTION} while reading from {MRD} "
+                   "namespace",
+                   "EXCEPTION", e.what(), "MRD", mrdNamespace);
+        throw NameSpaceNotFoundException();           
+    }
+    throw NoElementsException();
+}
+
 vector<SensorValue> getAllMRDValues(const string& mrdNamespace)
 {
     static unordered_map<string, unique_ptr<sensor_map_type>> sensor_map;

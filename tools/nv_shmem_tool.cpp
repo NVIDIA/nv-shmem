@@ -38,7 +38,7 @@ int main(int argc, char* argv[])
     if (argc < 3)
     {
         std::cerr << "Usage: " << argv[0]
-                  << " [read|erase|perf|create|stat] [namespace]" << std::endl;
+                  << " [read|erase|perf|create|stat|readraw] [namespace]" << std::endl;
         return 1; // Return an error code
     }
 
@@ -59,6 +59,19 @@ int main(int argc, char* argv[])
                       e.timestamp, " : ", e.sensorValue);
             }
         }
+        else if (std::string(argv[1]) == "readraw")
+        {
+            nv::shmem::Map<nv::shmem::SensorMap, nv::shmem::SensorValue> mShmem(
+                name_space, O_RDONLY);
+            trace(name_space, "Shmem Created (read-only).");
+            auto freeSize = mShmem.getFreeSize();
+            trace(name_space, "Shmem FreeSize: ", freeSize, " Bytes");
+            auto values = mShmem.getAllKeyValuePair();
+            for (auto e : values)
+            {
+                trace("Object Key ", e.first, " : ", e.second);
+            }
+        }        
         else if (std::string(argv[1]) == "erase")
         {
             nv::shmem::Map<nv::shmem::SensorMap, nv::shmem::SensorValue> mShmem(
@@ -157,7 +170,7 @@ int main(int argc, char* argv[])
         else
         {
             std::cerr << "Usage: " << argv[0]
-                      << " [read|erase|perf|create|stat] [namespace]"
+                      << " [read|erase|perf|create|stat|readraw] [namespace]"
                       << std::endl;
             return 1; // Return an error code
         }

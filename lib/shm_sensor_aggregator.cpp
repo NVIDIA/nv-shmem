@@ -197,6 +197,15 @@ bool SHMSensorAggregator::insertShmemObject(
         scoped_lock lock(nameSpaceMapLock);
         nameSpaceMap[sensorKey].arraySize = metricValues.size();
     }
+
+    if (metricValues.empty())
+    {
+        lg2::error("SHMEMDEBUG: sensorMapIntf.insert failed with no objects for {SHMNAMESPACE} with "
+                  "Key {SHMKEY}",
+                  "SHMNAMESPACE", shmNamespace, "SHMKEY", sensorKey);
+        return false;
+    }
+
     for (const auto& metricVal : metricValues)
     {
         if (!metricVal.first.empty())
@@ -204,11 +213,23 @@ bool SHMSensorAggregator::insertShmemObject(
             auto [tmpMetricProp, tmpMetricVal] = metricVal.second;
             SensorValue sensorValue(tmpMetricVal, tmpMetricProp, timestamp,
                                     timeStampStr);
+
+            lg2::info("SHMEMDEBUG: sensorMapIntf.insert {SHMNAMESPACE} with "
+                      "Key {SHMKEY}",
+                      "SHMNAMESPACE", shmNamespace, "SHMKEY", metricVal.first);
+
             if (!sensorMapIntf.insert(shmNamespace, metricVal.first,
                                       sensorValue))
             {
                 status = false;
             }
+        }
+        else
+        {
+            lg2::error(
+                "SHMEMDEBUG: sensorMapIntf.insert failed with empty key for {SHMNAMESPACE} with "
+                "Key {SHMKEY}",
+                "SHMNAMESPACE", shmNamespace, "SHMKEY", sensorKey);
         }
     }
     return status;
@@ -218,7 +239,7 @@ inline string SHMSensorAggregator::getSensorMapKey(const string& devicePath,
                                                    const string& interface,
                                                    const string& propName)
 {
-    return interface + "." + devicePath + "." + propName;
+    return devicePath + '/' + interface + "." + propName;
 }
 
 bool SHMSensorAggregator::updateNanValue(

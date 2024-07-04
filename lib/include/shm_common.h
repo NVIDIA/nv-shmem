@@ -21,6 +21,7 @@
 #include <sdbusplus/bus.hpp>
 
 #include <vector>
+#include <unordered_map>
 
 #ifdef ENABLE_SHM_DEBUG
 #define SHMDEBUG(msg, ...) lg2::info(msg, __VA_ARGS__)
@@ -107,6 +108,8 @@ struct SensorValue
         return *this;
     }
 };
+
+using ShmemKeyValuePairs = std::unordered_map<std::string, std::string>;
 
 } // namespace shmem
 } // namespace nv
