@@ -452,6 +452,16 @@ inline string generateURI(const string& deviceType, const string& deviceName,
         metricURI += subDeviceName;
         propSuffix = getPropertySuffix(ifaceName, metricName);
     }
+    else if (deviceType == "NetworkAdapterPortMetrics")
+    {
+        metricURI = "/redfish/v1/Chassis/" PLATFORMDEVICEPREFIX;
+        metricURI += deviceName;
+        metricURI += "/NetworkAdapters/";
+        metricURI += deviceName;
+        metricURI += "/Ports/";
+        metricURI += subDeviceName;
+        propSuffix = getPropertySuffix(ifaceName, metricName);
+    }
     else if (deviceType == "ProcessorMetrics")
     {
         metricURI = "/redfish/v1/Systems/" PLATFORMSYSTEMID;
