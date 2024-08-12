@@ -135,6 +135,7 @@ static MetricNameMap ibPortInterfaceMap = {
     {"RXRemotePhysicalErrorPkts", "/Metrics#/Oem/Nvidia/RXRemotePhysicalErrors"},
     {"RXSwitchRelayErrorPkts", "/Metrics#/Oem/Nvidia/RXSwitchRelayErrors"},
     {"QP1DroppedPkts", "/Metrics#/Oem/Nvidia/QP1Dropped"},
+    {"BitErrorRate", "/Metrics#/Oem/Nvidia/BitErrorRate"},
     {"TXWait", "/Metrics#/Oem/Nvidia/TXWait"}};
 
 /* Map for portMetricsOem1 interface pdi to redfish string based on metric name */
