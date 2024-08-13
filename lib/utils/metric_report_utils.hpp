@@ -220,6 +220,7 @@ static MetricNameMap pcieECCMap = {
     {"ReplayCount", "/PCIeErrors/ReplayCount"},
     {"NAKSentCount", "/PCIeErrors/NAKSentCount"},
     {"ReplayRolloverCount", "/PCIeErrors/ReplayRolloverCount"},
+    {"UnsupportedRequestCount", "/PCIeErrors/UnsupportedRequestCount"},
     {"PCIeType", "#/PCIeInterface/PCIeType"},
     {"MaxLanes", "#/PCIeInterface/MaxLanes"},
     {"LanesInUse", "#/PCIeInterface/LanesInUse"}};
@@ -248,7 +249,24 @@ static MetricNameMap memoryRowRemappingMap = {
      "/Oem/Nvidia/RowRemapping/UncorrectableRowRemappingCount"},
     {"ceRowRemappingCount",
      "/Oem/Nvidia/RowRemapping/CorrectableRowRemappingCount"},
-    {"RowRemappingFailureState", "/Oem/Nvidia/RowRemappingFailed"}};
+    {"RowRemappingFailureState", "/Oem/Nvidia/RowRemappingFailed"},
+    {"MaxRemappingAvailablityBankCount",
+     "/Oem/Nvidia/RowRemapping/MaxAvailablityBankCount"},
+    {"HighRemappingAvailablityBankCount",
+     "/Oem/Nvidia/RowRemapping/HighAvailablityBankCount"},
+    {"PartialRemappingAvailablityBankCount",
+     "/Oem/Nvidia/RowRemapping/PartialAvailablityBankCount"},
+    {"LowRemappingAvailablityBankCount",
+     "/Oem/Nvidia/RowRemapping/LowAvailablityBankCount"},
+    {"NoRemappingAvailablityBankCount",
+     "/Oem/Nvidia/RowRemapping/NoAvailablityBankCount"}};
+
+static MetricNameMap capacityUtilizationPercentMap
+{
+    {
+        "CapacityUtilizationPercent", "/CapacityUtilizationPercent"
+    }
+};
 
 /* Map for OperationalStatus pdi to redfish string based on metric name*/
 static MetricNameMap operationalStatusMap = {{"State", "/Status/State"}};
@@ -269,16 +287,16 @@ static PDINameMap pdiNameMap = {
     {"com.nvidia.NVLink.NVLinkMetrics", nvLinkMetricsMap},
     {"com.nvidia.GPMMetrics", gpmMetricsMap},
     {"xyz.openbmc_project.PCIe.PCIeECC", pcieECCMap},
+    {"xyz.openbmc_project.Inventory.Item.Dimm.MemoryMetrics",
+     capacityUtilizationPercentMap},
     {"xyz.openbmc_project.Memory.MemoryECC", memoryECCMap},
     {"xyz.openbmc_project.Inventory.Item.Cpu.OperatingConfig",
      operatingConfigMap},
     {"xyz.openbmc_project.Inventory.Item.Dimm", dimmMap},
     {"xyz.openbmc_project.Inventory.Item.PCIeDevice", pcieDeviceMap},
-    {"xyz.openbmc_project.Inventory.Item.Switch",
-     switchInterfaceMap},
+    {"xyz.openbmc_project.Inventory.Item.Switch", switchInterfaceMap},
     {"com.nvidia.MemoryRowRemapping", memoryRowRemappingMap},
-    {"xyz.openbmc_project.State.Decorator.OperationalStatus",
-     operationalStatusMap}};
+    {"xyz.openbmc_project.State.Decorator.OperationalStatus", operationalStatusMap}};
 
 /**
  * @brief This method will form suffix for redfish URI for device/sub device
@@ -525,11 +543,23 @@ inline string generateURI(const string& deviceType, const string& deviceName,
         if (ifaceName == "com.nvidia.MemoryRowRemapping")
         {
             if (metricName == "RowRemappingFailureState" ||
-                metricName == "RowRemappingPendingState")
+                metricName == "RowRemappingPendingState" ||
+                metricName == "HighRemappingAvailablityBankCount" ||
+                metricName == "PartialRemappingAvailablityBankCount" ||
+                metricName == "MaxRemappingAvailablityBankCount" ||
+                metricName == "LowRemappingAvailablityBankCount" ||
+                metricName == "NoRemappingAvailablityBankCount")
             {
                 metricURI += "#";
             }
             else
+            {
+                metricURI += "/MemoryMetrics#";
+            }
+        }
+        else if (ifaceName == "xyz.openbmc_project.Inventory.Item.Dimm.MemoryMetrics")
+        {
+            if(metricName == "CapacityUtilizationPercent")
             {
                 metricURI += "/MemoryMetrics#";
             }
@@ -633,7 +663,7 @@ inline pair<unordered_map<SHMKey, SHMValue>, bool>
                     const string& subDeviceName, const string& devicePath,
                     const string& metricName, const string& ifaceName,
                     DbusVariantType& value)
-{
+{  
     unordered_map<SHMKey, SHMValue> shmValues;
     bool isList = false;
     if (const vector<string>* readingArray = get_if<vector<string>>(&value))
