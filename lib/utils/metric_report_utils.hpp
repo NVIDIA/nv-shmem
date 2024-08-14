@@ -268,6 +268,10 @@ static MetricNameMap capacityUtilizationPercentMap
     }
 };
 
+/* Map for SMUtilization pdi to redfish string based on metric name*/
+static MetricNameMap SMUtilizationPercentMap{
+    {"SMUtilization", "/Oem/Nvidia/SMUtilizationPercent"}};
+
 /* Map for OperationalStatus pdi to redfish string based on metric name*/
 static MetricNameMap operationalStatusMap = {{"State", "/Status/State"}};
 
@@ -278,11 +282,15 @@ static MetricNameMap switchInterfaceMap = {{"CurrentBandwidth", "#/CurrentBandwi
  * corresponding metric name map */
 static PDINameMap pdiNameMap = {
     {"xyz.openbmc_project.Inventory.Decorator.PortInfo", portInfoInterfaceMap},
-    {"xyz.openbmc_project.Inventory.Decorator.PortState", portStateInterfaceMap},
+    {"xyz.openbmc_project.Inventory.Decorator.PortState",
+     portStateInterfaceMap},
     {"xyz.openbmc_project.Metrics.IBPort", ibPortInterfaceMap},
-    {"xyz.openbmc_project.Metrics.PortMetricsOem1", portMetricsOem1InterfaceMap},
-    {"xyz.openbmc_project.Metrics.PortMetricsOem2", portMetricsOem2InterfaceMap},
-    {"xyz.openbmc_project.Metrics.PortMetricsOem3", portMetricsOem3InterfaceMap},
+    {"xyz.openbmc_project.Metrics.PortMetricsOem1",
+     portMetricsOem1InterfaceMap},
+    {"xyz.openbmc_project.Metrics.PortMetricsOem2",
+     portMetricsOem2InterfaceMap},
+    {"xyz.openbmc_project.Metrics.PortMetricsOem3",
+     portMetricsOem3InterfaceMap},
     {"xyz.openbmc_project.State.ProcessorPerformance", processorPerfMap},
     {"com.nvidia.NVLink.NVLinkMetrics", nvLinkMetricsMap},
     {"com.nvidia.GPMMetrics", gpmMetricsMap},
@@ -292,11 +300,13 @@ static PDINameMap pdiNameMap = {
     {"xyz.openbmc_project.Memory.MemoryECC", memoryECCMap},
     {"xyz.openbmc_project.Inventory.Item.Cpu.OperatingConfig",
      operatingConfigMap},
+    {"com.nvidia.SMUtilization", SMUtilizationPercentMap},
     {"xyz.openbmc_project.Inventory.Item.Dimm", dimmMap},
     {"xyz.openbmc_project.Inventory.Item.PCIeDevice", pcieDeviceMap},
     {"xyz.openbmc_project.Inventory.Item.Switch", switchInterfaceMap},
     {"com.nvidia.MemoryRowRemapping", memoryRowRemappingMap},
-    {"xyz.openbmc_project.State.Decorator.OperationalStatus", operationalStatusMap}};
+    {"xyz.openbmc_project.State.Decorator.OperationalStatus",
+     operationalStatusMap}};
 
 /**
  * @brief This method will form suffix for redfish URI for device/sub device
