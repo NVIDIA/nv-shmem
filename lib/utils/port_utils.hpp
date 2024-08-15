@@ -41,6 +41,28 @@ static unordered_map<string, string> linkStatusTypeMap = {
     {"xyz.openbmc_project.Inventory.Decorator.PortState.LinkStatusType.Training",
      "Training"}};
 
+/* Map for link state pdi to redfish string */
+static unordered_map<string, string> linkStateTypeMap = {
+    {"xyz.openbmc_project.Inventory.Decorator.PortState.LinkStates.Disabled",
+     "Disabled"},
+    {"xyz.openbmc_project.Inventory.Decorator.PortState.LinkStates.Enabled",
+     "Enabled"},
+    {"xyz.openbmc_project.Inventory.Decorator.PortState.LinkStates.Error",
+     "Error"},
+    {"xyz.openbmc_project.Inventory.Decorator.PortState.LinkStates.Unknown",
+     "Unknown"}};
+
+/* Map for PowerSystemInputType pdi to redfish string */
+static unordered_map<string, string> powerSystemInputTypeTypeMap = {
+    {"xyz.openbmc_project.State.Decorator.PowerSystemInputs.Status.Good",
+     "Normal"},
+    {"xyz.openbmc_project.State.Decorator.PowerSystemInputs.Status.Fault",
+     "Fault"},
+    {"xyz.openbmc_project.State.Decorator.PowerSystemInputs.Status.InputOutOfRange",
+     "OutOfRange"},
+    {"xyz.openbmc_project.State.Decorator.PowerSystemInputs.Status.Unknown",
+     "Unknown"}};
+
 /**
  * @brief Method to Get the Link Status Type redfish string from PDI name.
  *
@@ -52,6 +74,38 @@ inline string getLinkStatusType(const string& linkStatusType)
     if (linkStatusTypeMap.find(linkStatusType) != linkStatusTypeMap.end())
     {
         return linkStatusTypeMap[linkStatusType];
+    }
+    return "";
+}
+
+/**
+ * @brief Method to Get the Link State Type redfish string from PDI name.
+ *
+ * @param[in] linkStateType
+ * @return string
+ */
+inline string getLinkStateType(const string& linkStateType)
+{
+    if (linkStateTypeMap.find(linkStateType) != linkStateTypeMap.end())
+    {
+        return linkStateTypeMap[linkStateType];
+    }
+    return "";
+}
+
+/**
+ * @brief Method to Get the Link powerSystemInputType redfish string from PDI
+ * name.
+ *
+ * @param[in] powerSystemInputType
+ * @return string
+ */
+inline string getPowerSystemInputType(const string& powerSystemInputType)
+{
+    if (powerSystemInputTypeTypeMap.find(powerSystemInputType) !=
+        powerSystemInputTypeTypeMap.end())
+    {
+        return powerSystemInputTypeTypeMap[powerSystemInputType];
     }
     return "";
 }

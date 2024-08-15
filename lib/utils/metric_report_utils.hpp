@@ -23,6 +23,9 @@
 
 #include <shm_common.h>
 
+#include <boost/algorithm/string.hpp>
+
+#include <cctype>
 #include <unordered_map>
 
 using namespace std;
@@ -67,7 +70,15 @@ static unordered_map<string, string> reasonTypeMap = {
      "Current memory temperature above the Memory Max Operating "
      "Temperature"},
     {"xyz.openbmc_project.State.ProcessorPerformance.ThrottleReasons.None",
-     "NA"}};
+     "NA"},
+    {"xyz.openbmc_project.State.ProcessorPerformance.PerformanceStates.Normal",
+     "Normal"},
+    {"xyz.openbmc_project.State.ProcessorPerformance.PerformanceStates.Throttled",
+     "Throttled"},
+    {"xyz.openbmc_project.State.ProcessorPerformance.PerformanceStates.Degraded",
+     "Degraded"},
+    {"xyz.openbmc_project.State.ProcessorPerformance.PerformanceStates.Unknown",
+     "Unknown"}};
 
 /* Map to convert pcie type pdi to redfish string */
 static unordered_map<string, string> pcieTypeMap = {
@@ -111,8 +122,8 @@ static MetricNameMap portInfoInterfaceMap = {
     {"MaxSpeed", "#/MaxSpeedGbps"}};
 
 /* Map for portState interface pdi to redfish string based on metric name */
-static MetricNameMap portStateInterfaceMap = {
-    {"LinkStatus", "#/LinkStatus"}};
+static MetricNameMap portStateInterfaceMap = {{"LinkStatus", "#/LinkStatus"},
+                                              {"LinkState", "#/Status/State"}};
 
 /* Map for IBPort interface pdi to redfish string based on metric name */
 static MetricNameMap ibPortInterfaceMap = {
@@ -174,7 +185,7 @@ static MetricNameMap processorPerfMap = {
      "/Oem/Nvidia/HardwareViolationThrottleDuration"},
     {"PCIeTXBytes", "/Oem/Nvidia/PCIeTXBytes"},
     {"PCIeRXBytes", "/Oem/Nvidia/PCIeRXBytes"},
-};
+    {"Value", "#/Oem/Nvidia/PowerBreakPerformanceState"}};
 
 /* Map for NvLinkMetricsMap pdi to redfish string based on metric name*/
 static MetricNameMap nvLinkMetricsMap = {
@@ -275,6 +286,14 @@ static MetricNameMap SMUtilizationPercentMap{
 /* Map for OperationalStatus pdi to redfish string based on metric name*/
 static MetricNameMap operationalStatusMap = {{"State", "/Status/State"}};
 
+/* Map for MemorySpareChannel pdi to redfish string based on metric name*/
+static MetricNameMap memorySpareChannelMap = {
+    {"MemorySpareChannelPresence", "#/Oem/Nvidia/MemorySpareChannelPresence"}};
+
+/* Map for EDPViolationState pdi to redfish string based on metric name*/
+static MetricNameMap edpViolationStateMap = {
+    {"Status", "#/Oem/Nvidia/EDPViolationState"}};
+
 /* Map for Switch pdi to redfish string based on metric name*/
 static MetricNameMap switchInterfaceMap = {{"CurrentBandwidth", "#/CurrentBandwidthGbps"}};
 
@@ -304,9 +323,11 @@ static PDINameMap pdiNameMap = {
     {"xyz.openbmc_project.Inventory.Item.Dimm", dimmMap},
     {"xyz.openbmc_project.Inventory.Item.PCIeDevice", pcieDeviceMap},
     {"xyz.openbmc_project.Inventory.Item.Switch", switchInterfaceMap},
+    {"xyz.openbmc_project.State.Decorator.OperationalStatus", operationalStatusMap},
     {"com.nvidia.MemoryRowRemapping", memoryRowRemappingMap},
-    {"xyz.openbmc_project.State.Decorator.OperationalStatus",
-     operationalStatusMap}};
+    {"com.nvidia.MemorySpareChannel", memorySpareChannelMap},
+    {"xyz.openbmc_project.State.Decorator.PowerSystemInputs",
+     edpViolationStateMap}};
 
 /**
  * @brief This method will form suffix for redfish URI for device/sub device
@@ -379,6 +400,30 @@ inline string getPowerStateType(const string& stateType)
 }
 
 /**
+ * @brief Method to get the Processor and cpu number for the device name.
+ *
+ * @param[in] deviceName
+ * @return pair<string, string>
+ * e.g For the input "ProcessorModule_1_CPU_0_CoreUtil_64", it will
+ * output (1, 0).
+ * For the input "ProcessorModule_0_Vreg_0_SocVoltage_0", it will
+ * output (0, 0).
+ */
+
+inline pair<string, string> getProcessorAndCpuNum(string deviceName)
+{
+    vector<string> deviceNameKeys;
+    boost::trim_if(deviceName, boost::is_any_of("_"));
+    boost::split(deviceNameKeys, deviceName, boost::is_any_of("_"));
+    if ((deviceNameKeys[1].size() == 1 && isdigit(deviceNameKeys[1][0])) &&
+        deviceNameKeys[3].size() == 1 && isdigit(deviceNameKeys[3][0]))
+    {
+        return make_pair(deviceNameKeys[1], deviceNameKeys[3]);
+    }
+    return {"", ""};
+}
+
+/**
  * @brief This method returns translated string for metric reading values based
  * on PDI and metric name.
  *
@@ -397,6 +442,10 @@ inline string translateReading(const string& ifaceName,
         {
             metricValue = toReasonType(reading);
         }
+        else if (metricName == "Value")
+        {
+            metricValue = toReasonType(reading);
+        }
     }
     else if (ifaceName == "xyz.openbmc_project.PCIe.PCIeECC")
     {
@@ -410,6 +459,18 @@ inline string translateReading(const string& ifaceName,
         if (metricName == "LinkStatus")
         {
             metricValue = getLinkStatusType(reading);
+        }
+        if (metricName == "LinkState")
+        {
+            metricValue = getLinkStateType(reading);
+        }
+    }
+    else if (ifaceName ==
+             "xyz.openbmc_project.State.Decorator.PowerSystemInputs")
+    {
+        if (metricName == "Status")
+        {
+            metricValue = getPowerSystemInputType(reading);
         }
     }
     else if (ifaceName ==
@@ -452,6 +513,40 @@ inline string generateURI(const string& deviceType, const string& deviceName,
         metricURI += deviceName;
         metricURI += "/Sensors/";
         metricURI += subDeviceName;
+    }
+    else if (deviceType == "CpuProcessorMetrics")
+    {
+        if (ifaceName == "xyz.openbmc_project.Sensor.Value")
+        {
+            metricURI = "/redfish/v1/Chassis/" PLATFORMDEVICEPREFIX;
+            metricURI += deviceName;
+            metricURI += "/Sensors/";
+            metricURI += subDeviceName;
+        }
+        else if (devicePath.find("xyz/openbmc_project/state") != 0)
+        {
+            string DeviceName = deviceName;
+            if (ifaceName == "com.nvidia.MemorySpareChannel" ||
+                ifaceName ==
+                    "xyz.openbmc_project.State.Decorator.PowerSystemInputs" ||
+                ifaceName == "xyz.openbmc_project.State.ProcessorPerformance")
+            {
+                metricURI = "/redfish/v1/Systems/" PLATFORMSYSTEMID;
+                metricURI += "/Processors/";
+                metricURI += "CPU_" + getProcessorAndCpuNum(deviceName).second;
+                metricURI += "/ProcessorMetrics";
+                propSuffix = getPropertySuffix(ifaceName, metricName);
+            }
+            else
+            {
+                metricURI = "/redfish/v1/Systems/" PLATFORMSYSTEMID;
+                metricURI += "/Processors/";
+                metricURI += "CPU_" + getProcessorAndCpuNum(deviceName).second;
+                metricURI += "/Ports/";
+                metricURI += deviceName;
+                propSuffix = getPropertySuffix(ifaceName, metricName);
+            }
+        }
     }
     else if (deviceType == "ProcessorPortMetrics")
     {
@@ -594,7 +689,8 @@ inline string generateURI(const string& deviceType, const string& deviceName,
     }
     else
     {
-        if (deviceType != "PlatformEnvironmentMetrics")
+        if (!((deviceType != "PlatformEnvironmentMetrics") ||
+              (deviceType != "CpuProcessorMetrics")))
         {
             metricURI.clear();
         }

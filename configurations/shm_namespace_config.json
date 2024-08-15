@@ -153,6 +153,50 @@
                 "NVLinkRawRxBandwidthGbps",
                 "NVLinkRawTxBandwidthGbps"
             ]
+        },
+        {
+            "Namespace": "CpuProcessorMetrics",
+            "ObjectpathKeywords": "sensors/utilization",
+            "PropertyList": [
+                "Value"
+            ]
+        },
+        {
+            "Namespace": "CpuProcessorMetrics",
+            "ObjectpathKeywords": "sensors/frequency",
+            "PropertyList": [
+                "Value"
+            ]
+        },
+        {
+            "Namespace": "CpuProcessorMetrics",
+            "ObjectpathKeywords": "sensors/voltage",
+            "PropertyList": [
+                "Value"
+            ]
+        },
+        {
+            "Namespace": "CpuProcessorMetrics",
+            "ObjectpathKeywords": "sensors/counter",
+            "PropertyList": [
+                "MemoryPageRetirementCount"
+            ]
+        },
+        {
+            "Namespace": "CpuProcessorMetrics",
+            "ObjectpathKeywords": "state",
+            "PropertyList": [
+                "Status",
+                "MemorySpareChannelPresence",
+                "LinkState"
+            ]
+        },
+        {
+            "Namespace": "CpuProcessorMetrics",
+            "ObjectpathKeywords": "state/Throttle",
+            "PropertyList": [
+                "Value"
+            ]
         }
     ]
 }
