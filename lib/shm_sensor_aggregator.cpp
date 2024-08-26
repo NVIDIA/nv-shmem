@@ -42,7 +42,8 @@ size_t SHMSensorAggregator::getMatchCount(string objPathKeyword,
         for (size_t devicePathIndex = devicePathStartIndex;
              devicePathIndex < devicePathKeys.size(); devicePathIndex++)
         {
-            if (objectPathKeys[objPathIndex] == devicePathKeys[devicePathIndex])
+            if (devicePathKeys[devicePathIndex].find(
+                    objectPathKeys[objPathIndex]) != std::string::npos)
             {
                 devicePathStartIndex = devicePathIndex;
                 tmpMatchCount += 1;
@@ -81,6 +82,7 @@ MatchingNameSpaces SHMSensorAggregator::parseDevicePath(
                                                    devicePathKeys);
             if (currentMatchCount == 0)
             {
+                tmpIndex += 1;
                 continue;
             }
             else if (currentMatchCount > maxMatchCount)
