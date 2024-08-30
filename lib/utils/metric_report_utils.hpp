@@ -243,7 +243,11 @@ static MetricNameMap memoryECCMap = {{"ueCount", "/UncorrectableECCErrorCount"},
 /* Map for OperatingConfig pdi to redfish string based on metric name*/
 static MetricNameMap operatingConfigMap = {
     {"Utilization", "/BandwidthPercent"},
-    {"OperatingSpeed", "/OperatingSpeedMHz"}};
+    {"OperatingSpeed", "/OperatingSpeedMHz"},
+    {"MaxSpeed", "/MaxSpeedMHz"},
+    {"MinSpeed", "/MinSpeedMHz"},
+    {"SpeedLimit", "/SpeedLimitMHz"},
+    {"SpeedLocked", "/SpeedLocked"}};
 
 /* Map for DIMM pdi to redfish string based on metric name*/
 static MetricNameMap dimmMap = {
@@ -295,7 +299,14 @@ static MetricNameMap edpViolationStateMap = {
     {"Status", "#/Oem/Nvidia/EDPViolationState"}};
 
 /* Map for Switch pdi to redfish string based on metric name*/
-static MetricNameMap switchInterfaceMap = {{"CurrentBandwidth", "#/CurrentBandwidthGbps"}};
+static MetricNameMap switchInterfaceMap = {
+    {"CurrentBandwidth", "/CurrentBandwidthGbps"},
+    {"MaxBandwidth", "/MaxBandwidthGbps"}};
+
+/* Map for Power Limit pdi to redfish string based on metric name*/
+static MetricNameMap PowerLimitMap = {
+    {"MaxPowerWatts", "/Power/MaxPowerWatts"},
+    {"MinPowerWatts", "/Power/MinPowerWatts"}};
 
 /* This map is for PDI name to metric name. Key is pdi name and value is
  * corresponding metric name map */
@@ -320,6 +331,7 @@ static PDINameMap pdiNameMap = {
     {"xyz.openbmc_project.Inventory.Item.Cpu.OperatingConfig",
      operatingConfigMap},
     {"com.nvidia.SMUtilization", SMUtilizationPercentMap},
+    {"xyz.openbmc_project.Inventory.Decorator.PowerLimit", PowerLimitMap},
     {"xyz.openbmc_project.Inventory.Item.Dimm", dimmMap},
     {"xyz.openbmc_project.Inventory.Item.PCIeDevice", pcieDeviceMap},
     {"xyz.openbmc_project.Inventory.Item.Switch", switchInterfaceMap},
