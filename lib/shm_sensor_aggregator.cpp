@@ -128,11 +128,11 @@ bool SHMSensorAggregator::createShmemNamespace()
     const auto& producers = ConfigReader::getProducers();
     for (const auto& producerEntry : producers)
     {
-        auto it = std::find(producerEntry.second.begin(), producerEntry.second.end(), producerName);
+        auto it = std::find(producerEntry.second.begin(),
+                            producerEntry.second.end(), producerName);
         if (it != producerEntry.second.end())
         {
-            auto shmNamespace = producerName + "_" +
-                                PLATFORMDEVICEPREFIX +
+            auto shmNamespace = producerName + "_" + PLATFORMDEVICEPREFIX +
                                 producerEntry.first + "_0";
             if (!sensorMapIntf.isNameSpacePresent(shmNamespace))
             {
@@ -140,8 +140,7 @@ bool SHMSensorAggregator::createShmemNamespace()
                 {
                     const size_t shmSize = ConfigReader::getSHMSize(
                         producerEntry.first, producerName);
-                    if (!sensorMapIntf.createNamespace(shmNamespace,
-                                                        shmSize))
+                    if (!sensorMapIntf.createNamespace(shmNamespace, shmSize))
                     {
                         status = false;
                         return status;
@@ -149,8 +148,7 @@ bool SHMSensorAggregator::createShmemNamespace()
                     lg2::info(
                         "SHMEMDEBUG: Shared memory created for {SHMNAMESPACE} with "
                         "size {SHMSIZE}",
-                        "SHMNAMESPACE", shmNamespace, "SHMSIZE",
-                        shmSize);
+                        "SHMNAMESPACE", shmNamespace, "SHMSIZE", shmSize);
                 }
                 catch (const exception& e)
                 {
@@ -202,9 +200,10 @@ bool SHMSensorAggregator::insertShmemObject(
 
     if (metricValues.empty())
     {
-        lg2::error("SHMEMDEBUG: sensorMapIntf.insert failed with no objects for {SHMNAMESPACE} with "
-                  "Key {SHMKEY}",
-                  "SHMNAMESPACE", shmNamespace, "SHMKEY", sensorKey);
+        lg2::error(
+            "SHMEMDEBUG: sensorMapIntf.insert failed with no objects for {SHMNAMESPACE} with "
+            "Key {SHMKEY}",
+            "SHMNAMESPACE", shmNamespace, "SHMKEY", sensorKey);
         return false;
     }
 

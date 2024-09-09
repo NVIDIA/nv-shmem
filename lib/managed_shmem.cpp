@@ -29,7 +29,9 @@ using namespace std;
 using namespace nv::shmem;
 
 ManagedShmem::ManagedShmem(const string& nameSpace, const int opts,
-                           size_t maxSize) : opts(opts), nameSpace(nameSpace)
+                           size_t maxSize) :
+    opts(opts),
+    nameSpace(nameSpace)
 {
     if (!boost::interprocess::shared_memory_object::remove(
             string(nameSpace).c_str()))

@@ -118,8 +118,7 @@ static unordered_map<string, string> powerStateTypeMap = {
 
 /* Map for portInfo interface pdi to redfish string based on metric name */
 static MetricNameMap portInfoInterfaceMap = {
-    {"CurrentSpeed", "#/CurrentSpeedGbps"},
-    {"MaxSpeed", "#/MaxSpeedGbps"}};
+    {"CurrentSpeed", "#/CurrentSpeedGbps"}, {"MaxSpeed", "#/MaxSpeedGbps"}};
 
 /* Map for portState interface pdi to redfish string based on metric name */
 static MetricNameMap portStateInterfaceMap = {{"LinkStatus", "#/LinkStatus"},
@@ -143,25 +142,28 @@ static MetricNameMap ibPortInterfaceMap = {
     {"SymbolError", "/Metrics#/Oem/Nvidia/SymbolErrors"},
     {"LinkErrorRecoveryCounter", "/Metrics#/Oem/Nvidia/LinkErrorRecoveryCount"},
     {"LinkDownCount", "/Metrics#/Oem/Nvidia/LinkDownedCount"},
-    {"RXRemotePhysicalErrorPkts", "/Metrics#/Oem/Nvidia/RXRemotePhysicalErrors"},
+    {"RXRemotePhysicalErrorPkts",
+     "/Metrics#/Oem/Nvidia/RXRemotePhysicalErrors"},
     {"RXSwitchRelayErrorPkts", "/Metrics#/Oem/Nvidia/RXSwitchRelayErrors"},
     {"QP1DroppedPkts", "/Metrics#/Oem/Nvidia/QP1Dropped"},
     {"BitErrorRate", "/Metrics#/Oem/Nvidia/BitErrorRate"},
     {"TXWait", "/Metrics#/Oem/Nvidia/TXWait"}};
 
-/* Map for portMetricsOem1 interface pdi to redfish string based on metric name */
+/* Map for portMetricsOem1 interface pdi to redfish string based on metric name
+ */
 static MetricNameMap portMetricsOem1InterfaceMap = {
     {"DataCRCCount", "/Metrics#/Oem/Nvidia/NVLinkErrors/DataCRCCount"},
     {"FlitCRCCount", "/Metrics#/Oem/Nvidia/NVLinkErrors/FlitCRCCount"},
     {"RecoveryCount", "/Metrics#/Oem/Nvidia/NVLinkErrors/RecoveryCount"},
     {"ReplayErrorsCount", "/Metrics#/Oem/Nvidia/NVLinkErrors/ReplayCount"}};
 
-/* Map for portMetricsOem2 interface pdi to redfish string based on metric name */
+/* Map for portMetricsOem2 interface pdi to redfish string based on metric name
+ */
 static MetricNameMap portMetricsOem2InterfaceMap = {
-    {"RXBytes", "/Metrics#/RXBytes"},
-    {"TXBytes", "/Metrics#/TXBytes"}};
+    {"RXBytes", "/Metrics#/RXBytes"}, {"TXBytes", "/Metrics#/TXBytes"}};
 
-/* Map for portMetricsOem3 interface pdi to redfish string based on metric name */
+/* Map for portMetricsOem3 interface pdi to redfish string based on metric name
+ */
 static MetricNameMap portMetricsOem3InterfaceMap = {
     {"RXNoProtocolBytes", "/Metrics#/Oem/Nvidia/RXNoProtocolBytes"},
     {"TXNoProtocolBytes", "/Metrics#/Oem/Nvidia/TXNoProtocolBytes"},
@@ -276,12 +278,8 @@ static MetricNameMap memoryRowRemappingMap = {
     {"NoRemappingAvailablityBankCount",
      "/Oem/Nvidia/RowRemapping/NoAvailablityBankCount"}};
 
-static MetricNameMap capacityUtilizationPercentMap
-{
-    {
-        "CapacityUtilizationPercent", "/CapacityUtilizationPercent"
-    }
-};
+static MetricNameMap capacityUtilizationPercentMap{
+    {"CapacityUtilizationPercent", "/CapacityUtilizationPercent"}};
 
 /* Map for SMUtilization pdi to redfish string based on metric name*/
 static MetricNameMap SMUtilizationPercentMap{
@@ -335,7 +333,8 @@ static PDINameMap pdiNameMap = {
     {"xyz.openbmc_project.Inventory.Item.Dimm", dimmMap},
     {"xyz.openbmc_project.Inventory.Item.PCIeDevice", pcieDeviceMap},
     {"xyz.openbmc_project.Inventory.Item.Switch", switchInterfaceMap},
-    {"xyz.openbmc_project.State.Decorator.OperationalStatus", operationalStatusMap},
+    {"xyz.openbmc_project.State.Decorator.OperationalStatus",
+     operationalStatusMap},
     {"com.nvidia.MemoryRowRemapping", memoryRowRemappingMap},
     {"com.nvidia.MemorySpareChannel", memorySpareChannelMap},
     {"xyz.openbmc_project.State.Decorator.PowerSystemInputs",
@@ -674,9 +673,10 @@ inline string generateURI(const string& deviceType, const string& deviceName,
                 metricURI += "/MemoryMetrics#";
             }
         }
-        else if (ifaceName == "xyz.openbmc_project.Inventory.Item.Dimm.MemoryMetrics")
+        else if (ifaceName ==
+                 "xyz.openbmc_project.Inventory.Item.Dimm.MemoryMetrics")
         {
-            if(metricName == "CapacityUtilizationPercent")
+            if (metricName == "CapacityUtilizationPercent")
             {
                 metricURI += "/MemoryMetrics#";
             }
@@ -781,7 +781,7 @@ inline pair<unordered_map<SHMKey, SHMValue>, bool>
                     const string& subDeviceName, const string& devicePath,
                     const string& metricName, const string& ifaceName,
                     DbusVariantType& value)
-{  
+{
     unordered_map<SHMKey, SHMValue> shmValues;
     bool isList = false;
     if (const vector<string>* readingArray = get_if<vector<string>>(&value))
@@ -824,7 +824,7 @@ inline pair<unordered_map<SHMKey, SHMValue>, bool>
                                             metricName, ifaceName);
             metricProp += "/";
             metricProp += to_string(i);
-            string sensorKey = devicePath + "/" + ifaceName + "." + metricName + 
+            string sensorKey = devicePath + "/" + ifaceName + "." + metricName +
                                "/" + to_string(i);
             SHMValue shmValue = {metricProp, val};
             shmValues.emplace(sensorKey, shmValue);

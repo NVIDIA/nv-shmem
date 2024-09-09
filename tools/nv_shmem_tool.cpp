@@ -38,7 +38,8 @@ int main(int argc, char* argv[])
     if (argc < 3)
     {
         std::cerr << "Usage: " << argv[0]
-                  << " [read|erase|perf|create|stat|readraw] [namespace]" << std::endl;
+                  << " [read|erase|perf|create|stat|readraw] [namespace]"
+                  << std::endl;
         return 1; // Return an error code
     }
 
@@ -71,7 +72,7 @@ int main(int argc, char* argv[])
             {
                 trace("Object Key ", e.first, " : ", e.second);
             }
-        }        
+        }
         else if (std::string(argv[1]) == "erase")
         {
             nv::shmem::Map<nv::shmem::SensorMap, nv::shmem::SensorValue> mShmem(
