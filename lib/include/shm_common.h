@@ -20,8 +20,8 @@
 #include <boost/interprocess/managed_shared_memory.hpp>
 #include <sdbusplus/bus.hpp>
 
-#include <vector>
 #include <unordered_map>
+#include <vector>
 
 #ifdef ENABLE_SHM_DEBUG
 #define SHMDEBUG(msg, ...) lg2::info(msg, __VA_ARGS__)
@@ -95,8 +95,9 @@ struct SensorValue
     SensorValue(const std::string& sensorValue,
                 const std::string& metricProperty, const uint64_t timestamp,
                 const std::string& timestampStr) :
-        sensorValue(sensorValue), metricProperty(metricProperty),
-        timestamp(timestamp), timestampStr(timestampStr)
+        sensorValue(sensorValue),
+        metricProperty(metricProperty), timestamp(timestamp),
+        timestampStr(timestampStr)
     {}
 
     SensorValue& operator=(const SensorMapValue& mapValue)

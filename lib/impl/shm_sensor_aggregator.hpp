@@ -73,7 +73,8 @@ class SHMSensorAggregator
      */
     explicit SHMSensorAggregator(string producerName,
                                  NameSpaceConfiguration nameSpaceCfg) :
-        producerName(move(producerName)), nameSpaceConfig(move(nameSpaceCfg))
+        producerName(move(producerName)),
+        nameSpaceConfig(move(nameSpaceCfg))
     {}
 
     /**

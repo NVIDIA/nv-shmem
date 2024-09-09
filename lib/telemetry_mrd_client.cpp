@@ -45,7 +45,8 @@ ShmemKeyValuePairs getAllKeyValuePair(const std::string& mrdNamespace)
         if (sensor_map.find(mrdNamespace) == sensor_map.end())
         {
             sensor_map.insert(std::make_pair(
-                mrdNamespace, make_unique<sensor_map_type>(mrdNamespace, O_RDONLY)));
+                mrdNamespace,
+                make_unique<sensor_map_type>(mrdNamespace, O_RDONLY)));
         }
         return sensor_map[mrdNamespace]->getAllKeyValuePair();
     }
@@ -54,7 +55,7 @@ ShmemKeyValuePairs getAllKeyValuePair(const std::string& mrdNamespace)
         lg2::error("SHMEMDEBUG: Exception {EXCEPTION} while reading from {MRD} "
                    "namespace",
                    "EXCEPTION", e.what(), "MRD", mrdNamespace);
-        throw NameSpaceNotFoundException();           
+        throw NameSpaceNotFoundException();
     }
     throw NoElementsException();
 }
