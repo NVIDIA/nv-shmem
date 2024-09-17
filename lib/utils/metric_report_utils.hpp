@@ -26,6 +26,7 @@
 #include <boost/algorithm/string.hpp>
 
 #include <cctype>
+#include <string>
 #include <unordered_map>
 
 using namespace std;
@@ -257,8 +258,11 @@ static MetricNameMap dimmMap = {
     {"Utilization", "/BandwidthPercent"}};
 
 /* Map for PCIe device pdi to redfish string based on metric name*/
-static MetricNameMap pcieDeviceMap = {{"PCIeType", "#/PCIeInterface/PCIeType"},
-                                      {"MaxLanes", "#/PCIeInterface/MaxLanes"}};
+static MetricNameMap pcieDeviceMap = {
+    {"PCIeType", "#/PCIeInterface/PCIeType"},
+    {"MaxPCIeType", "#/PCIeInterface/MaxPCIeType"},
+    {"LanesInUse", "#/PCIeInterface/LanesInUse"},
+    {"MaxLanes", "#/PCIeInterface/MaxLanes"}};
 
 /* Map for MemoryRowRemapping pdi to redfish string based on metric name*/
 static MetricNameMap memoryRowRemappingMap = {
@@ -302,9 +306,15 @@ static MetricNameMap switchInterfaceMap = {
     {"MaxBandwidth", "/MaxBandwidthGbps"}};
 
 /* Map for Power Limit pdi to redfish string based on metric name*/
-static MetricNameMap PowerLimitMap = {
-    {"MaxPowerWatts", "/Power/MaxPowerWatts"},
-    {"MinPowerWatts", "/Power/MinPowerWatts"}};
+static MetricNameMap PowerLimitMap = {{"MaxPowerWatts", "/MaxPowerWatts"},
+                                      {"MinPowerWatts", "/MinPowerWatts"}};
+
+/* Map for PCIe Reference Clock pdi to redfish string based on metric name*/
+static MetricNameMap pcieRefClockMap = {
+    {"PCIeReferenceClockEnabled", "#/Oem/Nvidia/PCIeReferenceClockEnabled"}};
+
+/* Map for Port width pdi to redfish string based on metric name*/
+static MetricNameMap portWidthInterfaceMap = {{"ActiveWidth", "#/ActiveWidth"}};
 
 /* This map is for PDI name to metric name. Key is pdi name and value is
  * corresponding metric name map */
@@ -338,7 +348,10 @@ static PDINameMap pdiNameMap = {
     {"com.nvidia.MemoryRowRemapping", memoryRowRemappingMap},
     {"com.nvidia.MemorySpareChannel", memorySpareChannelMap},
     {"xyz.openbmc_project.State.Decorator.PowerSystemInputs",
-     edpViolationStateMap}};
+     edpViolationStateMap},
+    {"xyz.openbmc_project.Inventory.Decorator.PortWidth",
+     portWidthInterfaceMap},
+    {"xyz.openbmc_project.Inventory.Decorator.PCIeRefClock", pcieRefClockMap}};
 
 /**
  * @brief This method will form suffix for redfish URI for device/sub device
@@ -629,6 +642,25 @@ inline string generateURI(const string& deviceType, const string& deviceName,
             metricURI += "/Processors/";
             metricURI += deviceName;
         }
+        else if (ifaceName ==
+                 "xyz.openbmc_project.Inventory.Decorator.PowerLimit")
+        {
+            metricURI = "/redfish/v1/Chassis/" PLATFORMDEVICEPREFIX;
+            metricURI += deviceName;
+            metricURI += "#";
+        }
+        else if (ifaceName ==
+                 "xyz.openbmc_project.Inventory.Item.Cpu.OperatingConfig")
+        {
+            if (metricName == "MaxSpeed" || metricName == "MinSpeed" ||
+                metricName == "SpeedLimit" || metricName == "SpeedLocked")
+            {
+                metricURI = "/redfish/v1/Systems/" PLATFORMSYSTEMID;
+                metricURI += "/Processors/";
+                metricURI += deviceName;
+                metricURI += "#";
+            }
+        }
         propSuffix = getPropertySuffix(ifaceName, metricName);
     }
     else if (deviceType == "ProcessorGPMMetrics")
@@ -649,6 +681,36 @@ inline string generateURI(const string& deviceType, const string& deviceName,
         {
             metricURI += "/InternalMemoryMetrics/LifeTime";
         }
+        propSuffix = getPropertySuffix(ifaceName, metricName);
+    }
+    else if (deviceType == "PCIeRetimerMetrics")
+    {
+        metricURI = "/redfish/v1/Chassis/";
+        metricURI += deviceName;
+        metricURI += "/PCIeDevices/";
+        metricURI += subDeviceName;
+        propSuffix = getPropertySuffix(ifaceName, metricName);
+    }
+    else if (deviceType == "PCIeRetimerPortMetrics")
+    {
+        size_t pos = deviceName.rfind('_');
+        std::string retimerID = "0";
+        if (pos != std::string::npos)
+        {
+            retimerID = deviceName.substr(pos + 1);
+        }
+
+        metricURI = "/redfish/v1/Fabrics/" PLATFORMDEVICEPREFIX;
+        metricURI += "PCIeRetimerTopology_" + retimerID;
+        metricURI += "/Switches/";
+        metricURI += deviceName;
+        metricURI += "/Ports/";
+        metricURI += subDeviceName;
+        if (ifaceName == "xyz.openbmc_project.PCIe.PCIeECC")
+        {
+            metricURI += "/Metrics#";
+        }
+
         propSuffix = getPropertySuffix(ifaceName, metricName);
     }
     else if (deviceType == "MemoryMetrics")
