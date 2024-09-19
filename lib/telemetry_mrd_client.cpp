@@ -62,7 +62,6 @@ ShmemKeyValuePairs getAllKeyValuePair(const std::string& mrdNamespace)
 
 vector<SensorValue> getAllMRDValues(const string& mrdNamespace)
 {
-    static unordered_map<string, unique_ptr<sensor_map_type>> sensor_map;
     static unordered_map<string, vector<string>> mrdNamespaceLookup =
         ConfigReader::getMRDNamespaceLookup();
     vector<SensorValue> values;
@@ -73,13 +72,8 @@ vector<SensorValue> getAllMRDValues(const string& mrdNamespace)
             try
             {
                 auto nameSpace = producerName + "_" + mrdNamespace;
-                if (sensor_map.find(nameSpace) == sensor_map.end())
-                {
-                    sensor_map.insert(std::make_pair(
-                        nameSpace,
-                        make_unique<sensor_map_type>(nameSpace, O_RDONLY)));
-                }
-                const auto& mrdValues = sensor_map[nameSpace]->getAllValues();
+                sensor_map_type sensor_map(nameSpace, O_RDONLY);
+                auto mrdValues = sensor_map.getAllValues();
                 if (mrdValues.size())
                 {
                     SHMDEBUG(
