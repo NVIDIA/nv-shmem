@@ -316,6 +316,13 @@ static MetricNameMap pcieRefClockMap = {
 /* Map for Port width pdi to redfish string based on metric name*/
 static MetricNameMap portWidthInterfaceMap = {{"ActiveWidth", "#/ActiveWidth"}};
 
+/* Map for Health to redfish string based on metric name*/
+static MetricNameMap healthInterfaceMap = {{"Health", "#/Status/Health"}};
+
+/* Map for HealthRollup to redfish string based on metric name*/
+static MetricNameMap healthRollupInterfaceMap = {
+    {"HealthRollup", "#/Status/HealthRollup"}};
+
 /* This map is for PDI name to metric name. Key is pdi name and value is
  * corresponding metric name map */
 static PDINameMap pdiNameMap = {
@@ -351,7 +358,10 @@ static PDINameMap pdiNameMap = {
      edpViolationStateMap},
     {"xyz.openbmc_project.Inventory.Decorator.PortWidth",
      portWidthInterfaceMap},
-    {"xyz.openbmc_project.Inventory.Decorator.PCIeRefClock", pcieRefClockMap}};
+    {"xyz.openbmc_project.Inventory.Decorator.PCIeRefClock", pcieRefClockMap},
+    {"xyz.openbmc_project.State.Decorator.Health", healthInterfaceMap},
+    {"xyz.openbmc_project.State.Decorator.HealthRollup",
+     healthRollupInterfaceMap}};
 
 /**
  * @brief This method will form suffix for redfish URI for device/sub device
@@ -753,10 +763,22 @@ inline string generateURI(const string& deviceType, const string& deviceName,
         }
         propSuffix = getPropertySuffix(ifaceName, metricName);
     }
+    else if (deviceType == "HealthMetrics")
+    {
+        metricURI = "/redfish/v1/Chassis/" PLATFORMDEVICEPREFIX;
+        std::string systemdId = PLATFORMDEVICEPREFIX + deviceName;
+        if (systemdId == PLATFORMSYSTEMID)
+        {
+            metricURI = "/redfish/v1/Systems/" PLATFORMDEVICEPREFIX;
+        }
+        metricURI += deviceName;
+        propSuffix = getPropertySuffix(ifaceName, metricName);
+    }
     else
     {
         metricURI.clear();
     }
+
     if (!propSuffix.empty())
     {
         metricURI += propSuffix;
