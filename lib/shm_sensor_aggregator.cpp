@@ -99,6 +99,16 @@ MatchingNameSpaces SHMSensorAggregator::parseDevicePath(
                         subDeviceName = string(devicePathObj.filename());
                         deviceName = "";
                     }
+                    else if (devicePath.find("health/chassis") == 0)
+                    {
+                        subDeviceName = string(devicePathObj.filename());
+                        deviceName = "";
+                    }
+                    else if (devicePath.find("health/system") == 0)
+                    {
+                        subDeviceName = string(devicePathObj.filename());
+                        deviceName = "";
+                    }
                     else
                     {
                         deviceName = string(devicePathObj.parent_path()
