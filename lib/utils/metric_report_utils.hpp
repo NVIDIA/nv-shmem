@@ -651,6 +651,7 @@ inline string generateURI(const string& deviceType, const string& deviceName,
             metricURI = "/redfish/v1/Systems/" PLATFORMSYSTEMID;
             metricURI += "/Processors/";
             metricURI += deviceName;
+            metricURI += "#";
         }
         else if (ifaceName ==
                  "xyz.openbmc_project.Inventory.Decorator.PowerLimit")
