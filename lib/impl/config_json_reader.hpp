@@ -17,6 +17,8 @@
 
 #pragma once
 
+#include "impl/error_logger.hpp"
+
 #include <shm_common.h>
 
 #include <nlohmann/json.hpp>

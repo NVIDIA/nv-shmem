@@ -15,6 +15,8 @@ conf_data.set_quoted('PLATFORMSYSTEMID', get_option('platform-system-id'))
 conf_data.set_quoted('PLATFORMDEVICEPREFIX', get_option('platform-device-prefix'))
 conf_data.set_quoted('SHM_NAMESPACE_CFG_JSON', join_paths(package_datadir, 'shm_namespace_config.json'))
 conf_data.set_quoted('SHM_MAPPING_JSON', join_paths(package_datadir, 'shm_mapping.json'))
+conf_data.set('LOG_INTERVAL_SECONDS', get_option('log_interval_seconds'))
+conf_data.set('MAX_LOG_ENTRIES', get_option('max_log_entries'))
 if get_option('enable-shm-debug').enabled()
     add_project_arguments('-DENABLE_SHM_DEBUG', language : 'cpp')
 endif
@@ -34,6 +36,7 @@ libnvshmem = static_library(
     'telemetry_mrd_producer.cpp',
     'shm_sensor_aggregator.cpp',
     'telemetry_mrd_client.cpp',
+    'error_logger.cpp',
     implicit_include_directories: false,
     include_directories: [nv_shmem_includes],
     dependencies: [

@@ -111,6 +111,10 @@ bool fromDurationItem(string_view& fmt, const char postfix,
         lg2::error("SHMEMDEBUG: Failed to convert string to decimal with err: "
                    "{CONV_ERROR}",
                    "CONV_ERROR", static_cast<int>(ec));
+        string errorMessage =
+            "SHMEMDEBUG: Failed to convert string to decimal with err: " +
+            to_string(static_cast<int>(ec));
+        LOG_ERROR(errorMessage);
         return false;
     }
 
@@ -155,16 +159,16 @@ inline optional<chrono::milliseconds> fromDurationString(const string& str)
     }
     if (v.front() != 'P')
     {
-        lg2::error("SHMEMDEBUG: Invalid duration format: {INVALID_DURATION}",
-                   "INVALID_DURATION", str);
+        string errorMessage = "SHMEMDEBUG: Invalid duration format: " + str;
+        LOG_ERROR(errorMessage);
         return nullopt;
     }
 
     v.remove_prefix(1);
     if (!details::fromDurationItem<details::Days>(v, 'D', out))
     {
-        lg2::error("SHMEMDEBUG: Invalid duration format: {INVALID_DURATION}",
-                   "INVALID_DURATION", str);
+        string errorMessage = "SHMEMDEBUG: Invalid duration format: " + str;
+        LOG_ERROR(errorMessage);
         return nullopt;
     }
 
@@ -174,8 +178,8 @@ inline optional<chrono::milliseconds> fromDurationString(const string& str)
     }
     if (v.front() != 'T')
     {
-        lg2::error("SHMEMDEBUG: Invalid duration format: {INVALID_DURATION}",
-                   "INVALID_DURATION", str);
+        string errorMessage = "SHMEMDEBUG: Invalid duration format: " + str;
+        LOG_ERROR(errorMessage);
         return nullopt;
     }
 
@@ -183,8 +187,8 @@ inline optional<chrono::milliseconds> fromDurationString(const string& str)
     if (!details::fromDurationItem<chrono::hours>(v, 'H', out) ||
         !details::fromDurationItem<chrono::minutes>(v, 'M', out))
     {
-        lg2::error("SHMEMDEBUG: Invalid duration format: {INVALID_DURATION}",
-                   "INVALID_DURATION", str);
+        string errorMessage = "SHMEMDEBUG: Invalid duration format: " + str;
+        LOG_ERROR(errorMessage);
         return nullopt;
     }
 
@@ -193,23 +197,22 @@ inline optional<chrono::milliseconds> fromDurationString(const string& str)
         if (!details::fromDurationItem<chrono::seconds>(v, '.', out) ||
             !details::fromDurationItem<chrono::milliseconds>(v, 'S', out))
         {
-            lg2::error(
-                "SHMEMDEBUG: Invalid duration format: {INVALID_DURATION}",
-                "INVALID_DURATION", str);
+            string errorMessage = "SHMEMDEBUG: Invalid duration format: " + str;
+            LOG_ERROR(errorMessage);
             return nullopt;
         }
     }
     else if (!details::fromDurationItem<chrono::seconds>(v, 'S', out))
     {
-        lg2::error("SHMEMDEBUG: Invalid duration format: {INVALID_DURATION}",
-                   "INVALID_DURATION", str);
+        string errorMessage = "SHMEMDEBUG: Invalid duration format: " + str;
+        LOG_ERROR(errorMessage);
         return nullopt;
     }
 
     if (!v.empty())
     {
-        lg2::error("SHMEMDEBUG: Invalid duration format: {INVALID_DURATION}",
-                   "INVALID_DURATION", str);
+        string errorMessage = "SHMEMDEBUG: Invalid duration format: " + str;
+        LOG_ERROR(errorMessage);
         return nullopt;
     }
     return out;

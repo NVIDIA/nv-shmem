@@ -16,6 +16,7 @@
  */
 
 #pragma once
+#include "impl/error_logger.hpp"
 #include "shmem_map.hpp"
 
 #include <boost/format.hpp>
@@ -104,10 +105,10 @@ class ShmSensorMapIntf
             }
             else
             {
-                lg2::error(
-                    "SHMEMDEBUG: ShmSensorMapIntf insert unknown name space: "
-                    "{SHM_NAMESPACE}",
-                    "SHM_NAMESPACE", mrdNamespace);
+                string errorMessage =
+                    "SHMEMDEBUG: ShmSensorMapIntf insert unknown name space: " +
+                    mrdNamespace;
+                LOG_ERROR(errorMessage);
                 return false;
             }
         }
@@ -141,19 +142,19 @@ class ShmSensorMapIntf
                 if (!((*itr).second->updateTimestamp(key, timestamp,
                                                      timeStampStr)))
                 {
-                    lg2::error(
-                        "SHMEMDEBUG: Invalid shared memory key: {SHMKEY}",
-                        "SHMKEY", key);
+                    string errorMessage =
+                        "SHMEMDEBUG: Invalid shared memory key: " + key;
+                    LOG_ERROR(errorMessage);
                     return false;
                 }
                 return true;
             }
             else
             {
-                lg2::error(
-                    "SHMEMDEBUG: ShmSensorMapIntf updateTimestamp unknown name "
-                    "space: {SHM_NAMESPACE}",
-                    "SHM_NAMESPACE", mrdNamespace);
+                string errorMessage =
+                    "SHMEMDEBUG: ShmSensorMapIntf updateTimestamp unknown name space: " +
+                    mrdNamespace;
+                LOG_ERROR(errorMessage);
                 return false;
             }
         }
@@ -185,19 +186,19 @@ class ShmSensorMapIntf
             {
                 if (!((*itr).second->updateValue(key, value)))
                 {
-                    lg2::error(
-                        "SHMEMDEBUG: Invalid shared memory key: {SHM_KEY}",
-                        "SHM_KEY", key);
+                    string errorMessage =
+                        "SHMEMDEBUG: Invalid shared memory key: " + key;
+                    LOG_ERROR(errorMessage);
                     return false;
                 }
                 return true;
             }
             else
             {
-                lg2::error(
-                    "SHMEMDEBUG: ShmSensorMapIntf updateValue unknown name "
-                    "space: {SHM_NAMESPACE}",
-                    "SHM_NAMESPACE", mrdNamespace);
+                string errorMessage =
+                    "SHMEMDEBUG: ShmSensorMapIntf updateTimestamp unknown name space: " +
+                    mrdNamespace;
+                LOG_ERROR(errorMessage);
                 return false;
             }
         }
@@ -233,19 +234,19 @@ class ShmSensorMapIntf
                 if (!((*itr).second->updateValueAndTimeStamp(
                         key, value, timestamp, timeStampStr)))
                 {
-                    lg2::error(
-                        "SHMEMDEBUG: Invalid shared memory key: {SHM_KEY}",
-                        "SHM_KEY", key);
+                    string errorMessage =
+                        "SHMEMDEBUG: Invalid shared memory key: " + key;
+                    LOG_ERROR(errorMessage);
                     return false;
                 }
                 return true;
             }
             else
             {
-                lg2::error(
-                    "SHMEMDEBUG: ShmSensorMapIntf updateValueAndTimeStamp unknown name "
-                    "space: {SHM_NAMESPACE}",
-                    "SHM_NAMESPACE", mrdNamespace);
+                string errorMessage =
+                    "SHMEMDEBUG: ShmSensorMapIntf updateTimestamp unknown name space: " +
+                    mrdNamespace;
+                LOG_ERROR(errorMessage);
                 return false;
             }
         }
@@ -278,10 +279,10 @@ class ShmSensorMapIntf
             }
             else
             {
-                lg2::error(
-                    "SHMEMDEBUG: ShmSensorMapIntf erase unknown name space: "
-                    "{SHM_NAMESPACE}",
-                    "SHM_NAMESPACE", mrdNamespace);
+                string errorMessage =
+                    "SHMEMDEBUG: ShmSensorMapIntf erase unknown name space: " +
+                    mrdNamespace;
+                LOG_ERROR(errorMessage);
                 return false;
             }
         }

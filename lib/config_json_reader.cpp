@@ -34,21 +34,23 @@ void ConfigReader::loadNamespaceConfig()
     }
     if (!filesystem::exists(SHM_NAMESPACE_CFG_JSON))
     {
-        lg2::error("SHMEMDEBUG: namespaceCfg Json file {JSONPATH} not present",
-                   "JSONPATH", string(SHM_NAMESPACE_CFG_JSON));
+        string errorMessage = "SHMEMDEBUG: namespaceCfg Json file" +
+                              string(SHM_NAMESPACE_CFG_JSON) + "not present";
+        LOG_ERROR(errorMessage);
         throw invalid_argument("Invalid filepath");
     }
     std::ifstream jsonFile(SHM_NAMESPACE_CFG_JSON);
     auto data = Json::parse(jsonFile, nullptr, false);
     if (data.is_discarded())
     {
-        lg2::error(
-            "SHMEMDEBUG: Parsing namespaceCfg Json file failed, FILE={JSONPATH}",
-            "JSONPATH", string(SHM_NAMESPACE_CFG_JSON));
+        string errorMessage =
+            "SHMEMDEBUG: Parsing namespaceCfg Json file failed, FILE=" +
+            string(SHM_NAMESPACE_CFG_JSON);
+        LOG_ERROR(errorMessage);
         throw runtime_error("Parsing namespaceCfg Json file failed");
     }
-    lg2::info("SHMEMDEBUG: NamespaceConfig loaded successfully: {JSONPATH}",
-              "JSONPATH", string(SHM_NAMESPACE_CFG_JSON));
+    SHMDEBUG("SHMEMDEBUG: NamespaceConfig loaded successfully: {JSONPATH}",
+             "JSONPATH", string(SHM_NAMESPACE_CFG_JSON));
     namespaceCfgJson = make_unique<Json>(std::move(data));
 }
 
@@ -60,21 +62,23 @@ void ConfigReader::loadSHMMappingConfig()
     }
     if (!filesystem::exists(SHM_MAPPING_JSON))
     {
-        lg2::error("SHMEMDEBUG: shmMapping Json file {JSONPATH} not present",
-                   "JSONPATH", string(SHM_MAPPING_JSON));
+        string errorMessage = "SHMEMDEBUG: shmMapping Json file" +
+                              string(SHM_MAPPING_JSON) + "not present";
+        LOG_ERROR(errorMessage);
         throw invalid_argument("Invalid filepath");
     }
     std::ifstream jsonFile(SHM_MAPPING_JSON);
     auto data = Json::parse(jsonFile, nullptr, false);
     if (data.is_discarded())
     {
-        lg2::error(
-            "SHMEMDEBUG: Parsing shmMapping Json file failed, FILE={JSONPATH}",
-            "JSONPATH", string(SHM_MAPPING_JSON));
+        string errorMessage =
+            "SHMEMDEBUG: Parsing shmMapping Json file failed, FILE=" +
+            string(SHM_MAPPING_JSON);
+        LOG_ERROR(errorMessage);
         throw runtime_error("Parsing shmMapping Json file failed");
     }
-    lg2::info("SHMEMDEBUG: SHMMapping loaded successfully: {JSONPATH}",
-              "JSONPATH", string(SHM_MAPPING_JSON));
+    SHMDEBUG("SHMEMDEBUG: SHMMapping loaded successfully: {JSONPATH}",
+             "JSONPATH", string(SHM_MAPPING_JSON));
     shmMappingJson = make_unique<Json>(std::move(data));
 }
 
@@ -82,7 +86,8 @@ unordered_map<string, vector<string>> ConfigReader::getProducers()
 {
     if (shmMappingJson == nullptr)
     {
-        lg2::error("SHMEMDEBUG: Json file is not loaded");
+        string errorMessage = "SHMEMDEBUG: Json file is not loaded";
+        LOG_ERROR(errorMessage);
         throw runtime_error("Json file is not loaded");
     }
     static unordered_map<string, vector<string>> producers;
@@ -98,8 +103,9 @@ unordered_map<string, vector<string>> ConfigReader::getProducers()
     }
     else
     {
-        lg2::error(
-            "SHMEMDEBUG: SHM Mapping file does not contain key Namespaces");
+        string errorMessage =
+            "SHMEMDEBUG: SHM Mapping file does not contain key Namespaces";
+        LOG_ERROR(errorMessage);
         throw runtime_error("Namespaces key not found");
     }
     return producers;
@@ -109,7 +115,8 @@ NameSpaceConfiguration ConfigReader::getNameSpaceConfiguration()
 {
     if (namespaceCfgJson == nullptr)
     {
-        lg2::error("SHMEMDEBUG: Json file is not loaded");
+        string errorMessage = "SHMEMDEBUG: Json file is not loaded";
+        LOG_ERROR(errorMessage);
         throw runtime_error("Json file is not loaded");
     }
     NameSpaceConfiguration nameSpaceConfig;
@@ -143,8 +150,9 @@ NameSpaceConfiguration ConfigReader::getNameSpaceConfiguration()
             }
             else
             {
-                lg2::error(
-                    "SHMEMDEBUG: Invalid entry for shared memory namespace");
+                string errorMessage =
+                    "SHMEMDEBUG: Invalid entry for shared memory namespace";
+                LOG_ERROR(errorMessage);
                 // Error in one entry continue with remaining entries
             }
         }
@@ -157,7 +165,8 @@ size_t ConfigReader::getSHMSize(const std::string& sensorNamespace,
 {
     if (shmMappingJson == nullptr)
     {
-        lg2::error("SHMEMDEBUG: Json file is not loaded");
+        string errorMessage = "SHMEMDEBUG: Json file is not loaded";
+        LOG_ERROR(errorMessage);
         throw runtime_error("Json file is not loaded");
     }
     if (shmMappingJson->contains("Namespaces"))
@@ -177,35 +186,35 @@ size_t ConfigReader::getSHMSize(const std::string& sensorNamespace,
                 }
                 else
                 {
-                    lg2::error(
-                        "SHMEMDEBUG: Namespace {SENSOR_NAMESPACE} does not contain "
-                        "Producer {PRODUCER_NAME}",
-                        "SENSOR_NAMESPACE", sensorNamespace, "PRODUCER_NAME",
-                        producerName);
+                    string errorMessage =
+                        "SHMEMDEBUG: Namespace" + sensorNamespace +
+                        "does not contain Producer" + producerName;
+                    LOG_ERROR(errorMessage);
                     throw runtime_error("Key not found");
                 }
             }
             else
             {
-                lg2::error(
-                    "SHMEMDEBUG: Namespace {SENSOR_NAMESPACE} does not contain "
-                    "Producers key",
-                    "SENSOR_NAMESPACE", sensorNamespace);
+                string errorMessage = "SHMEMDEBUG: Namespace" +
+                                      sensorNamespace +
+                                      "does not contain Producers key";
+                LOG_ERROR(errorMessage);
                 throw runtime_error("Producers key not found");
             }
         }
         else
         {
-            lg2::error(
-                "SHMEMDEBUG: Namespace {SENSOR_NAMESPACE} not found in mapping file",
-                "SENSOR_NAMESPACE", sensorNamespace);
+            string errorMessage = "SHMEMDEBUG: Namespace" + sensorNamespace +
+                                  "not found in mapping file";
+            LOG_ERROR(errorMessage);
             throw runtime_error("Namespace not found");
         }
     }
     else
     {
-        lg2::error(
-            "SHMEMDEBUG: SHM Mapping file does not contain key Namespaces");
+        string errorMessage =
+            "SHMEMDEBUG: SHM Mapping file does not contain key Namespaces";
+        LOG_ERROR(errorMessage);
         throw runtime_error("Namespaces key not found");
     }
 }
