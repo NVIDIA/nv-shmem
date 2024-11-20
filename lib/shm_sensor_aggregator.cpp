@@ -155,7 +155,7 @@ bool SHMSensorAggregator::createShmemNamespace()
                         status = false;
                         return status;
                     }
-                    lg2::info(
+                    SHMDEBUG(
                         "SHMEMDEBUG: Shared memory created for {SHMNAMESPACE} with "
                         "size {SHMSIZE}",
                         "SHMNAMESPACE", shmNamespace, "SHMSIZE", shmSize);
@@ -210,10 +210,10 @@ bool SHMSensorAggregator::insertShmemObject(
 
     if (metricValues.empty())
     {
-        lg2::error(
-            "SHMEMDEBUG: sensorMapIntf.insert failed with no objects for {SHMNAMESPACE} with "
-            "Key {SHMKEY}",
-            "SHMNAMESPACE", shmNamespace, "SHMKEY", sensorKey);
+        string errorMessage =
+            "SHMEMDEBUG: sensorMapIntf.insert failed with no objects for" +
+            shmNamespace + "with Key" + sensorKey;
+        LOG_ERROR(errorMessage);
         return false;
     }
 
@@ -225,9 +225,9 @@ bool SHMSensorAggregator::insertShmemObject(
             SensorValue sensorValue(tmpMetricVal, tmpMetricProp, timestamp,
                                     timeStampStr);
 
-            lg2::info("SHMEMDEBUG: sensorMapIntf.insert {SHMNAMESPACE} with "
-                      "Key {SHMKEY}",
-                      "SHMNAMESPACE", shmNamespace, "SHMKEY", metricVal.first);
+            SHMDEBUG("SHMEMDEBUG: sensorMapIntf.insert {SHMNAMESPACE} with "
+                     "Key {SHMKEY}",
+                     "SHMNAMESPACE", shmNamespace, "SHMKEY", metricVal.first);
 
             if (!sensorMapIntf.insert(shmNamespace, metricVal.first,
                                       sensorValue))
@@ -237,10 +237,10 @@ bool SHMSensorAggregator::insertShmemObject(
         }
         else
         {
-            lg2::error(
-                "SHMEMDEBUG: sensorMapIntf.insert failed with empty key for {SHMNAMESPACE} with "
-                "Key {SHMKEY}",
-                "SHMNAMESPACE", shmNamespace, "SHMKEY", sensorKey);
+            string errorMessage =
+                "SHMEMDEBUG: sensorMapIntf.insert failed with empty key for" +
+                shmNamespace + "with Key" + sensorKey;
+            LOG_ERROR(errorMessage);
         }
     }
     return status;
@@ -297,8 +297,9 @@ bool SHMSensorAggregator::updateNanValue(
         if (!sensorMapIntf.updateValueAndTimeStamp(shmNamespace, shmKey, "nan",
                                                    timestamp, timeStampStr))
         {
-            lg2::error("SHMEMDEBUG: update timestamp and value failed {SHMKEY}",
-                       "SHMKEY", shmKey);
+            string errorMessage =
+                "SHMEMDEBUG : update timestamp and value failed" + shmKey;
+            ErrorLogger::getInstance().logError(errorMessage);
             status = false;
         }
     }
@@ -307,8 +308,9 @@ bool SHMSensorAggregator::updateNanValue(
         if (!sensorMapIntf.updateValueAndTimeStamp(
                 shmNamespace, sensorKey, "nan", timestamp, timeStampStr))
         {
-            lg2::error("SHMEMDEBUG: update timestamp and value failed {SHMKEY}",
-                       "SHMKEY", sensorKey);
+            string errorMessage =
+                "SHMEMDEBUG : update timestamp and value failed" + sensorKey;
+            ErrorLogger::getInstance().logError(errorMessage);
             status = false;
         }
     }
@@ -338,9 +340,10 @@ bool SHMSensorAggregator::handleObjectInsertion(
         {
             if (associatedEntityPath.empty())
             {
-                lg2::error("SHMEMDEBUG: Parent path should not be empty for "
-                           "sensor resource: {DEVICE_PATH}",
-                           "DEVICE_PATH", devicePath);
+                string errorMessage =
+                    "SHMEMDEBUG: Parent path should not be empty for sensor resource: " +
+                    devicePath;
+                LOG_ERROR(errorMessage);
                 scoped_lock lock(notApplicableKeysLock);
                 notApplicableKeys.emplace(sensorKey, 1);
                 return false;
@@ -382,10 +385,10 @@ bool SHMSensorAggregator::handleArrayUpdates(
                                                        propertyValue, timestamp,
                                                        timeStampStr))
             {
-                lg2::error(
-                    "SHMEMDEBUG: Error while updating value and timestamp for: "
-                    "{SENSOR_KEY}",
-                    "SENSOR_KEY", sensorKey);
+                string errorMessage =
+                    "SHMEMDEBUG: Error while updating value and timestamp for:" +
+                    sensorKey;
+                LOG_ERROR(errorMessage);
                 status = false;
             }
         }
@@ -397,9 +400,9 @@ bool SHMSensorAggregator::handleArrayUpdates(
             string shmKey = sensorKey + "/" + to_string(i);
             if (!sensorMapIntf.erase(shmNamespace, shmKey))
             {
-                lg2::error("SHMEMDEBUG: Error while erasing object: "
-                           "{SENSOR_KEY}",
-                           "SENSOR_KEY", sensorKey);
+                string errorMessage =
+                    "SHMEMDEBUG: Error while erasing object: " + sensorKey;
+                LOG_ERROR(errorMessage);
                 status = false;
             }
         }
@@ -412,11 +415,10 @@ bool SHMSensorAggregator::handleArrayUpdates(
                                                        propertyValue, timestamp,
                                                        timeStampStr))
             {
-                lg2::error(
-                    "SHMEMDEBUG: Error while updating value and timestamp for: "
-                    "{SENSOR_KEY}",
-                    "SENSOR_KEY", shmKey);
-                status = false;
+                string errorMessage =
+                    "SHMEMDEBUG: Error while updating value and timestamp for:" +
+                    shmKey;
+                LOG_ERROR(errorMessage);
             }
             arrayCount += 1;
         }
@@ -439,10 +441,10 @@ bool SHMSensorAggregator::handleArrayUpdates(
                         shmNamespace, shmKey, tmpMetricVal, timestamp,
                         timeStampStr))
                 {
-                    lg2::error(
-                        "SHMEMDEBUG: Error while updating value and timestamp for: "
-                        "{SENSOR_KEY}",
-                        "SENSOR_KEY", shmKey);
+                    string errorMessage =
+                        "SHMEMDEBUG: Error while updating value and timestamp for:" +
+                        shmKey;
+                    LOG_ERROR(errorMessage);
                     status = false;
                 }
             }
@@ -453,9 +455,9 @@ bool SHMSensorAggregator::handleArrayUpdates(
                 if (!sensorMapIntf.insert(shmNamespace, tmpMetricVal,
                                           sensorValue))
                 {
-                    lg2::error("SHMEMDEBUG: Error while inserting object: "
-                               "{SENSOR_KEY}",
-                               "SENSOR_KEY", shmKey);
+                    string errorMessage =
+                        "SHMEMDEBUG: Error while inserting object: " + shmKey;
+                    LOG_ERROR(errorMessage);
                     status = false;
                 }
             }
@@ -506,10 +508,10 @@ bool SHMSensorAggregator::updateSHMObject(const string& devicePath,
                                                        propertyValue, timestamp,
                                                        timeStampStr))
             {
-                lg2::error(
-                    "SHMEMDEBUG: Error while updating value and timestamp for: "
-                    "{SENSOR_KEY}",
-                    "SENSOR_KEY", sensorKey);
+                string errorMessage =
+                    "SHMEMDEBUG: Error while updating value and timestamp for:" +
+                    sensorKey;
+                LOG_ERROR(errorMessage);
                 status = false;
             }
         }
@@ -552,8 +554,9 @@ bool SHMSensorAggregator::updateSHMObject(const string& devicePath,
     }
     else
     {
-        lg2::error("SHMEMDEBUG: Error while adding object: {SENSOR_KEY}",
-                   "SENSOR_KEY", sensorKey);
+        string errorMessage = "SHMEMDEBUG: Error while adding object: " +
+                              sensorKey;
+        LOG_ERROR(errorMessage);
     }
     return status;
 }

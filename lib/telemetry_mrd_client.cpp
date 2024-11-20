@@ -84,9 +84,9 @@ vector<SensorValue> getAllMRDValues(const string& mrdNamespace)
                 }
                 else
                 {
-                    lg2::error(
-                        "SHMEMDEBUG: Requested {MRD} namespace has no elements",
-                        "MRD", nameSpace);
+                    string errorMessage = "SHMEMDEBUG: Requested" + nameSpace +
+                                          "namespace has no elements";
+                    LOG_ERROR(errorMessage);
                 }
             }
             catch (const exception& e)
@@ -103,16 +103,17 @@ vector<SensorValue> getAllMRDValues(const string& mrdNamespace)
         }
         else
         {
-            lg2::error("SHMEMDEBUG: Requested {MRD} namespace has no elements.",
-                       "MRD", mrdNamespace);
+            string errorMessage = "SHMEMDEBUG: Requested" + mrdNamespace +
+                                  "namespace has no elements.";
+            LOG_ERROR(errorMessage);
             throw NoElementsException();
         }
     }
     else
     {
-        lg2::error(
-            "SHMEMDEBUG: Requested {MRD} namespace is not found in the MRD lookup.",
-            "MRD", mrdNamespace);
+        string errorMessage = "SHMEMDEBUG: Requested" + mrdNamespace +
+                              "namespace is not found in the MRD lookup.";
+        LOG_ERROR(errorMessage);
         throw NameSpaceNotFoundException();
     }
 }

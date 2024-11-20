@@ -27,8 +27,8 @@ shared_ptr<SHMSensorAggregator> AggregationService::sensorAggregator = nullptr;
 
 bool AggregationService::namespaceInit(string processName)
 {
-    lg2::info("Initializing shm namespace for process: {PROCESS_NAME}",
-              "PROCESS_NAME", processName);
+    SHMDEBUG("Initializing shm namespace for process: {PROCESS_NAME}",
+             "PROCESS_NAME", processName);
     try
     {
         ConfigReader::loadSHMMappingConfig();
@@ -72,7 +72,8 @@ bool AggregationService::namespaceInit(string processName)
     }
     if (!sensorAggregator->createShmemNamespace())
     {
-        lg2::error("SHMEMDEBUG: Exception while creating namespace.");
+        string errorMessage = "SHMEMDEBUG: Exception while creating namespace.";
+        LOG_ERROR(errorMessage);
         return false;
     }
 

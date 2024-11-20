@@ -923,11 +923,12 @@ inline pair<unordered_map<SHMKey, SHMValue>, bool>
                                               metricName, ifaceName);
         if (metricProp.empty())
         {
-            lg2::error(
-                "SHMEMDEBUG: Metric Property Empty for deviceType {DEVICETYPE} deviceName {DEVICENAME} subDeviceName {SUBDEVICENAME} devicePath {DEVICEPATH} metricName {METRICNAME} ifaceName {IFNAME}",
-                "DEVICETYPE", deviceType, "DEVICENAME", deviceName,
-                "SUBDEVICENAME", subDeviceName, "DEVICEPATH", devicePath,
-                "METRICNAME", metricName, "IFNAME", ifaceName);
+            string errorMessage =
+                "SHMEMDEBUG: Metric Property Empty for deviceType " +
+                deviceType + " deviceName " + deviceName + " subDeviceName " +
+                subDeviceName + " devicePath " + devicePath + " metricName " +
+                metricName + " ifaceName " + ifaceName;
+            LOG_ERROR(errorMessage);
             return {shmValues, isList};
         }
         string val;

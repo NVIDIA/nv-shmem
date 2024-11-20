@@ -36,7 +36,7 @@ ManagedShmem::ManagedShmem(const string& nameSpace, const int opts,
     if (!boost::interprocess::shared_memory_object::remove(
             string(nameSpace).c_str()))
     {
-        lg2::info(
+        SHMDEBUG(
             "SHMEMDEBUG: Shared memory namespace {SHM_NAMESPACE} does not exist. "
             "Remove is skipped.",
             "SHM_NAMESPACE", nameSpace);
@@ -47,7 +47,7 @@ ManagedShmem::ManagedShmem(const string& nameSpace, const int opts,
     if (!boost::interprocess::named_upgradable_mutex::remove(
             string(nameSpace + "lock").c_str()))
     {
-        lg2::info(
+        SHMDEBUG(
             "SHMEMDEBUG: Shared memory namespace lock {SHM_NAMESPACE_LOCK} "
             "does not "
             "exist. Remove lock is skipped.",

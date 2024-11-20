@@ -18,6 +18,7 @@
 #pragma once
 
 #include "impl/config_json_reader.hpp"
+#include "impl/error_logger.hpp"
 #include "shm_sensormap_intf.hpp"
 
 #include <shm_common.h>
