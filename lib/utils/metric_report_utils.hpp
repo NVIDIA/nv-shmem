@@ -557,29 +557,25 @@ inline string generateURI(const string& deviceType, const string& deviceName,
             metricURI += "/Sensors/";
             metricURI += subDeviceName;
         }
-        else if (devicePath.find("xyz/openbmc_project/state") != 0)
+        else if (ifaceName == "com.nvidia.MemorySpareChannel" ||
+                 ifaceName ==
+                     "xyz.openbmc_project.State.Decorator.PowerSystemInputs" ||
+                 ifaceName == "xyz.openbmc_project.State.ProcessorPerformance")
         {
-            string DeviceName = deviceName;
-            if (ifaceName == "com.nvidia.MemorySpareChannel" ||
-                ifaceName ==
-                    "xyz.openbmc_project.State.Decorator.PowerSystemInputs" ||
-                ifaceName == "xyz.openbmc_project.State.ProcessorPerformance")
-            {
-                metricURI = "/redfish/v1/Systems/" PLATFORMSYSTEMID;
-                metricURI += "/Processors/";
-                metricURI += "CPU_" + getProcessorAndCpuNum(deviceName).second;
-                metricURI += "/ProcessorMetrics";
-                propSuffix = getPropertySuffix(ifaceName, metricName);
-            }
-            else
-            {
-                metricURI = "/redfish/v1/Systems/" PLATFORMSYSTEMID;
-                metricURI += "/Processors/";
-                metricURI += "CPU_" + getProcessorAndCpuNum(deviceName).second;
-                metricURI += "/Ports/";
-                metricURI += deviceName;
-                propSuffix = getPropertySuffix(ifaceName, metricName);
-            }
+            metricURI = "/redfish/v1/Systems/" PLATFORMSYSTEMID;
+            metricURI += "/Processors/";
+            metricURI += deviceName;
+            metricURI += "/ProcessorMetrics";
+            propSuffix = getPropertySuffix(ifaceName, metricName);
+        }
+        else
+        {
+            metricURI = "/redfish/v1/Systems/" PLATFORMSYSTEMID;
+            metricURI += "/Processors/";
+            metricURI += deviceName;
+            metricURI += "/Ports/";
+            metricURI += subDeviceName;
+            propSuffix = getPropertySuffix(ifaceName, metricName);
         }
     }
     else if (deviceType == "ProcessorPortMetrics")

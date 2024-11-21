@@ -184,7 +184,7 @@
         },
         {
             "Namespace": "CpuProcessorMetrics",
-            "ObjectpathKeywords": "state",
+            "ObjectpathKeywords": "state/ProcessorModule",
             "PropertyList": [
                 "Status",
                 "MemorySpareChannelPresence",
