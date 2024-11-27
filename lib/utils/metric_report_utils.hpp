@@ -732,12 +732,7 @@ inline string generateURI(const string& deviceType, const string& deviceName,
         if (ifaceName == "com.nvidia.MemoryRowRemapping")
         {
             if (metricName == "RowRemappingFailureState" ||
-                metricName == "RowRemappingPendingState" ||
-                metricName == "HighRemappingAvailablityBankCount" ||
-                metricName == "PartialRemappingAvailablityBankCount" ||
-                metricName == "MaxRemappingAvailablityBankCount" ||
-                metricName == "LowRemappingAvailablityBankCount" ||
-                metricName == "NoRemappingAvailablityBankCount")
+                metricName == "RowRemappingPendingState")
             {
                 metricURI += "#";
             }
