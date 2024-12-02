@@ -683,7 +683,14 @@ inline string generateURI(const string& deviceType, const string& deviceName,
         metricURI = "/redfish/v1/Fabrics/" PLATFORMDEVICEPREFIX;
         metricURI += "NVLinkFabric_0/Switches/";
         metricURI += deviceName;
-        metricURI += "/SwitchMetrics#";
+        if (!(metricName == "CurrentBandwidth" || metricName == "MaxBandwidth"))
+        {
+            metricURI += "/SwitchMetrics#";
+        }
+        else
+        {
+            metricURI += "#";
+        }
         if (ifaceName == "xyz.openbmc_project.Memory.MemoryECC")
         {
             metricURI += "/InternalMemoryMetrics/LifeTime";
