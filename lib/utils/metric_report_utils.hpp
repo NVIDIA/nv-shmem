@@ -223,6 +223,17 @@ static MetricNameMap gpmMetricsMap = {
     {"IMMAUtilizationPercent", "/Oem/Nvidia/IMMAUtilizationPercent"},
 };
 
+/* Map for ResetCounter MEtrics pdi to redfish string based on metric name*/
+static MetricNameMap resetCountersMetricsMap = {
+    {"PF_FLR_ResetEntryCount", "/PF_FLR_ResetEntryCount"},
+    {"PF_FLR_ResetExitCount", "/PF_FLR_ResetExitCount"},
+    {"ConventionalResetEntryCount", "/ConventionalResetEntryCount"},
+    {"ConventionalResetExitCount", "/ConventionalResetExitCount"},
+    {"FundamentalResetEntryCount", "/FundamentalResetEntryCount"},
+    {"FundamentalResetExitCount", "/FundamentalResetExitCount"},
+    {"IRoTResetExitCount", "/IRoTResetExitCount"},
+    {"LastResetType", "/LastResetType"}};
+
 /* Map for PCIeECC pdi to redfish string based on metric name*/
 static MetricNameMap pcieECCMap = {
     {"nonfeCount", "/PCIeErrors/NonFatalErrorCount"},
@@ -339,6 +350,7 @@ static PDINameMap pdiNameMap = {
     {"xyz.openbmc_project.State.ProcessorPerformance", processorPerfMap},
     {"com.nvidia.NVLink.NVLinkMetrics", nvLinkMetricsMap},
     {"com.nvidia.GPMMetrics", gpmMetricsMap},
+    {"com.nvidia.ResetCounters.ResetCounterMetrics", resetCountersMetricsMap},
     {"xyz.openbmc_project.PCIe.PCIeECC", pcieECCMap},
     {"xyz.openbmc_project.Inventory.Item.Dimm.MemoryMetrics",
      capacityUtilizationPercentMap},
@@ -676,6 +688,15 @@ inline string generateURI(const string& deviceType, const string& deviceName,
         metricURI += "/Processors/";
         metricURI += deviceName;
         metricURI += "/ProcessorMetrics#";
+        propSuffix = getPropertySuffix(ifaceName, metricName);
+    }
+    else if (deviceType == "ProcessorResetMetrics")
+    {
+        metricURI = "/redfish/v1/Systems/" PLATFORMSYSTEMID;
+        metricURI += "/Processors/";
+        metricURI += deviceName;
+        metricURI += "/Oem/Nvidia";
+        metricURI += "/ProcessorResetMetrics#";
         propSuffix = getPropertySuffix(ifaceName, metricName);
     }
     else if (deviceType == "NVSwitchMetrics")
