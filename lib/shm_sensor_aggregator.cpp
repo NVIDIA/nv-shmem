@@ -114,6 +114,13 @@ MatchingNameSpaces SHMSensorAggregator::parseDevicePath(
                         subDeviceName = string(devicePathObj.filename());
                         deviceName = "";
                     }
+                    else if (devicePath.find("ResetStatistics") !=
+                             std::string::npos)
+                    {
+                        deviceName =
+                            string(devicePathObj.parent_path().filename());
+                        subDeviceName = "";
+                    }
                     else
                     {
                         deviceName = string(devicePathObj.parent_path()
