@@ -48,6 +48,16 @@ using PDIName = std::string;
 using MetricNameMap = unordered_map<MetricName, string>;
 using PDINameMap = unordered_map<PDIName, MetricNameMap>;
 
+/* Map for last reset type pdi to redfish string */
+static unordered_map<string, string> lastResetTypeMap = {
+    {"com.nvidia.ResetCounters.ResetCounterMetrics.ResetTypes.PFFLR", "PFFLR"},
+    {"com.nvidia.ResetCounters.ResetCounterMetrics.ResetTypes.Conventional",
+     "Conventional"},
+    {"com.nvidia.ResetCounters.ResetCounterMetrics.ResetTypes.Fundamental",
+     "Fundamental"},
+    {"com.nvidia.ResetCounters.ResetCounterMetrics.ResetTypes.IRoTReset",
+     "IRoTReset"}};
+
 /* Map for reason type PDI to redfish string */
 static unordered_map<string, string> reasonTypeMap = {
     {"xyz.openbmc_project.State.ProcessorPerformance."
@@ -414,6 +424,21 @@ inline string toReasonType(const string& reason)
 }
 
 /**
+ * @brief Method to Get the Last Reset Type redfish string from PDI name.
+ *
+ * @param[in] lastresetType
+ * @return string
+ */
+inline string getLastResetType(const string& lastResetType)
+{
+    if (lastResetTypeMap.find(lastResetType) != lastResetTypeMap.end())
+    {
+        return lastResetTypeMap[lastResetType];
+    }
+    return "Unknown";
+}
+
+/**
  * @brief Method to get pcie type of metric from PDI.
  *
  * @param[in] pcieType
@@ -525,6 +550,13 @@ inline string translateReading(const string& ifaceName,
         if (metricName == "State")
         {
             metricValue = getPowerStateType(reading);
+        }
+    }
+    else if (ifaceName == "com.nvidia.ResetCounters.ResetCounterMetrics")
+    {
+        if (metricName == "LastResetType")
+        {
+            metricValue = getLastResetType(reading);
         }
     }
     else
