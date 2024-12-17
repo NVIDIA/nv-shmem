@@ -97,7 +97,8 @@ static unordered_map<string, string> pcieTypeMap = {
     {"xyz.openbmc_project.Inventory.Item.PCIeDevice.PCIeTypes.Gen2", "Gen2"},
     {"xyz.openbmc_project.Inventory.Item.PCIeDevice.PCIeTypes.Gen3", "Gen3"},
     {"xyz.openbmc_project.Inventory.Item.PCIeDevice.PCIeTypes.Gen4", "Gen4"},
-    {"xyz.openbmc_project.Inventory.Item.PCIeDevice.PCIeTypes.Gen5", "Gen5"}};
+    {"xyz.openbmc_project.Inventory.Item.PCIeDevice.PCIeTypes.Gen5", "Gen5"},
+    {"xyz.openbmc_project.Inventory.Item.PCIeDevice.PCIeTypes.Gen6", "Gen6"}};
 
 /* Map to convert power state type pdi to redfish string */
 static unordered_map<string, string> powerStateTypeMap = {
@@ -557,6 +558,13 @@ inline string translateReading(const string& ifaceName,
         if (metricName == "LastResetType")
         {
             metricValue = getLastResetType(reading);
+        }
+    }
+    else if (ifaceName == "xyz.openbmc_project.Inventory.Item.PCIeDevice")
+    {
+        if (metricName == "MaxPCIeType" || metricName == "PCIeType")
+        {
+            metricValue = toPCIeType(reading);
         }
     }
     else
