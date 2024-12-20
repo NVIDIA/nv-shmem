@@ -294,15 +294,15 @@ static MetricNameMap memoryRowRemappingMap = {
      "/Oem/Nvidia/RowRemapping/CorrectableRowRemappingCount"},
     {"RowRemappingFailureState", "/Oem/Nvidia/RowRemappingFailed"},
     {"MaxRemappingAvailablityBankCount",
-     "/Oem/Nvidia/RowRemapping/MaxAvailablityBankCount"},
+     "/Oem/Nvidia/RowRemapping/MaxAvailabilityBankCount"},
     {"HighRemappingAvailablityBankCount",
-     "/Oem/Nvidia/RowRemapping/HighAvailablityBankCount"},
+     "/Oem/Nvidia/RowRemapping/HighAvailabilityBankCount"},
     {"PartialRemappingAvailablityBankCount",
-     "/Oem/Nvidia/RowRemapping/PartialAvailablityBankCount"},
+     "/Oem/Nvidia/RowRemapping/PartialAvailabilityBankCount"},
     {"LowRemappingAvailablityBankCount",
-     "/Oem/Nvidia/RowRemapping/LowAvailablityBankCount"},
+     "/Oem/Nvidia/RowRemapping/LowAvailabilityBankCount"},
     {"NoRemappingAvailablityBankCount",
-     "/Oem/Nvidia/RowRemapping/NoAvailablityBankCount"}};
+     "/Oem/Nvidia/RowRemapping/NoAvailabilityBankCount"}};
 
 static MetricNameMap capacityUtilizationPercentMap{
     {"CapacityUtilizationPercent", "/CapacityUtilizationPercent"}};
