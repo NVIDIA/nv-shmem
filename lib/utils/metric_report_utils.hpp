@@ -318,6 +318,11 @@ static MetricNameMap operationalStatusMap = {{"State", "/Status/State"}};
 static MetricNameMap memorySpareChannelMap = {
     {"MemorySpareChannelPresence", "#/Oem/Nvidia/MemorySpareChannelPresence"}};
 
+/* Map for MemoryPageRetirementCount pdi to redfish string based on metric
+ * name*/
+static MetricNameMap memoryPageRetirementCountMap = {
+    {"MemoryPageRetirementCount", "#/Oem/Nvidia/MemoryPageRetirementCount"}};
+
 /* Map for EDPViolationState pdi to redfish string based on metric name*/
 static MetricNameMap edpViolationStateMap = {
     {"Status", "#/Oem/Nvidia/EDPViolationState"}};
@@ -377,6 +382,7 @@ static PDINameMap pdiNameMap = {
      operationalStatusMap},
     {"com.nvidia.MemoryRowRemapping", memoryRowRemappingMap},
     {"com.nvidia.MemorySpareChannel", memorySpareChannelMap},
+    {"com.nvidia.MemoryPageRetirementCount", memoryPageRetirementCountMap},
     {"xyz.openbmc_project.State.Decorator.PowerSystemInputs",
      edpViolationStateMap},
     {"xyz.openbmc_project.Inventory.Decorator.PortWidth",
@@ -612,7 +618,9 @@ inline string generateURI(const string& deviceType, const string& deviceName,
         else if (ifaceName == "com.nvidia.MemorySpareChannel" ||
                  ifaceName ==
                      "xyz.openbmc_project.State.Decorator.PowerSystemInputs" ||
-                 ifaceName == "xyz.openbmc_project.State.ProcessorPerformance")
+                 ifaceName ==
+                     "xyz.openbmc_project.State.ProcessorPerformance" ||
+                 ifaceName == "com.nvidia.MemoryPageRetirementCount")
         {
             metricURI = "/redfish/v1/Systems/" PLATFORMSYSTEMID;
             metricURI += "/Processors/";
