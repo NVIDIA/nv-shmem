@@ -98,7 +98,12 @@ static unordered_map<string, string> pcieTypeMap = {
     {"xyz.openbmc_project.Inventory.Item.PCIeDevice.PCIeTypes.Gen3", "Gen3"},
     {"xyz.openbmc_project.Inventory.Item.PCIeDevice.PCIeTypes.Gen4", "Gen4"},
     {"xyz.openbmc_project.Inventory.Item.PCIeDevice.PCIeTypes.Gen5", "Gen5"},
-    {"xyz.openbmc_project.Inventory.Item.PCIeDevice.PCIeTypes.Gen6", "Gen6"}};
+    {"xyz.openbmc_project.Inventory.Item.PCIeDevice.PCIeTypes.Gen6", "Gen6"},
+    {"xyz.openbmc_project.PCIe.PCIeECC.PCIeTypes.Gen1", "Gen1"},
+    {"xyz.openbmc_project.PCIe.PCIeECC.PCIeTypes.Gen2", "Gen2"},
+    {"xyz.openbmc_project.PCIe.PCIeECC.PCIeTypes.Gen3", "Gen3"},
+    {"xyz.openbmc_project.PCIe.PCIeECC.PCIeTypes.Gen4", "Gen4"},
+    {"xyz.openbmc_project.PCIe.PCIeECC.PCIeTypes.Gen5", "Gen5"}};
 
 /* Map to convert power state type pdi to redfish string */
 static unordered_map<string, string> powerStateTypeMap = {
