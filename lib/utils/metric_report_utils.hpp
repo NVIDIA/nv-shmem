@@ -26,6 +26,7 @@
 #include <boost/algorithm/string.hpp>
 
 #include <cctype>
+#include <regex>
 #include <string>
 #include <unordered_map>
 
@@ -323,11 +324,6 @@ static MetricNameMap operationalStatusMap = {{"State", "/Status/State"}};
 static MetricNameMap memorySpareChannelMap = {
     {"MemorySpareChannelPresence", "#/Oem/Nvidia/MemorySpareChannelPresence"}};
 
-/* Map for MemoryPageRetirementCount pdi to redfish string based on metric
- * name*/
-static MetricNameMap memoryPageRetirementCountMap = {
-    {"MemoryPageRetirementCount", "#/Oem/Nvidia/MemoryPageRetirementCount"}};
-
 /* Map for EDPViolationState pdi to redfish string based on metric name*/
 static MetricNameMap edpViolationStateMap = {
     {"Status", "#/Oem/Nvidia/EDPViolationState"}};
@@ -387,7 +383,6 @@ static PDINameMap pdiNameMap = {
      operationalStatusMap},
     {"com.nvidia.MemoryRowRemapping", memoryRowRemappingMap},
     {"com.nvidia.MemorySpareChannel", memorySpareChannelMap},
-    {"com.nvidia.MemoryPageRetirementCount", memoryPageRetirementCountMap},
     {"xyz.openbmc_project.State.Decorator.PowerSystemInputs",
      edpViolationStateMap},
     {"xyz.openbmc_project.Inventory.Decorator.PortWidth",
@@ -615,17 +610,27 @@ inline string generateURI(const string& deviceType, const string& deviceName,
     {
         if (ifaceName == "xyz.openbmc_project.Sensor.Value")
         {
-            metricURI = "/redfish/v1/Chassis/" PLATFORMDEVICEPREFIX;
-            metricURI += deviceName;
-            metricURI += "/Sensors/";
-            metricURI += subDeviceName;
+            std::regex pageRetirementRegex("PageRetirementCount_\\d+$");
+            if (std::regex_search(subDeviceName, pageRetirementRegex))
+            {
+                metricURI = "/redfishh/v1/Systems/" PLATFORMSYSTEMID;
+                metricURI += "/Processors/";
+                metricURI += deviceName;
+                metricURI += "/ProcessorMetrics";
+                propSuffix = "#/Oem/Nvidia/MemoryPageRetirementCount";
+            }
+            else
+            {
+                metricURI = "/redfish/v1/Chassis/" PLATFORMDEVICEPREFIX;
+                metricURI += deviceName;
+                metricURI += "/Sensors/";
+                metricURI += subDeviceName;
+            }
         }
         else if (ifaceName == "com.nvidia.MemorySpareChannel" ||
                  ifaceName ==
                      "xyz.openbmc_project.State.Decorator.PowerSystemInputs" ||
-                 ifaceName ==
-                     "xyz.openbmc_project.State.ProcessorPerformance" ||
-                 ifaceName == "com.nvidia.MemoryPageRetirementCount")
+                 ifaceName == "xyz.openbmc_project.State.ProcessorPerformance")
         {
             metricURI = "/redfish/v1/Systems/" PLATFORMSYSTEMID;
             metricURI += "/Processors/";
