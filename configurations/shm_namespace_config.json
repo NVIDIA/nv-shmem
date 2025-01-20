@@ -157,30 +157,22 @@
         {
             "Namespace": "CpuProcessorMetrics",
             "ObjectpathKeywords": "sensors/utilization",
-            "PropertyList": [
-                "Value"
-            ]
+            "PropertyList": ["Value"]
         },
         {
             "Namespace": "CpuProcessorMetrics",
             "ObjectpathKeywords": "sensors/frequency",
-            "PropertyList": [
-                "Value"
-            ]
+            "PropertyList": ["Value"]
         },
         {
             "Namespace": "CpuProcessorMetrics",
             "ObjectpathKeywords": "sensors/voltage",
-            "PropertyList": [
-                "Value"
-            ]
+            "PropertyList": ["Value"]
         },
         {
             "Namespace": "CpuProcessorMetrics",
             "ObjectpathKeywords": "sensors/counter",
-            "PropertyList": [
-                "MemoryPageRetirementCount"
-            ]
+            "PropertyList": ["Value"]
         },
         {
             "Namespace": "CpuProcessorMetrics",
